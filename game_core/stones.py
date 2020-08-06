@@ -8,27 +8,29 @@ class _Stone:
     def __init__(self, field: GameField, x: int, y: int):
         self.x = x
         self.y = y
-        self.neighbors = []
+        self.neighbors = set()
         self.breaths = 4
-        self._set_influence(field)
 
-    def _set_influence(self, field: GameField):
+    def set_influence(self, field: GameField):
         """Подсчет и настройка влияния соседей"""
         for i, j in (0, 1), (1, 0), (0, -1), (-1, 0):
             neighbor = field.get_obj_on_position(self.x + i, self.y + j)
             if not neighbor:
                 continue
             self.breaths -= 1
-            if neighbor is _Stone:
+            if isinstance(neighbor, _Stone):
                 neighbor.close_breath()
 
-                if neighbor is type(self):
-                    self.neighbors.append(neighbor)
+                if type(neighbor) is type(self):
+                    self.neighbors.add(neighbor)
+                    self.neighbors.update(neighbor.neighbors)
 
         for neighbor in self.neighbors:
             neighbor.add_neighbor(self)
 
-        self.breaths = self.neighbors[0].breaths
+        for rand_neigh in self.neighbors:
+            self.breaths = rand_neigh.breaths
+            break
 
     def close_breath(self):
         self.breaths -= 1
@@ -37,6 +39,10 @@ class _Stone:
 
     def add_neighbor(self, neighbor):
         self.breaths += neighbor.breaths
+        self.neighbors.add(neighbor)
+
+    def rm(self):
+        pass
 
 
 class WhiteStone(_Stone):
