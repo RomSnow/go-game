@@ -37,11 +37,10 @@ class GameField:
         if self._field[y][x]:
             raise exc.IncorrectMove
 
-        stone = stone_type(self, x, y)
+        stone = stone_type(x, y)
         self._field[y][x] = stone
         stone.set_influence(self)
         return stone
 
     def remove_stone_on_position(self, x, y):
-        self._field[y][x].rm()
         self._field[y][x] = 0

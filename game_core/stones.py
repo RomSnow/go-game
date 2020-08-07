@@ -1,48 +1,104 @@
 """Классы игровых камней"""
-from game_core.field import GameField
+from game_core.field import GameField, exc
 
 
 class _Stone:
     """Родительсий класс камней"""
 
-    def __init__(self, field: GameField, x: int, y: int):
+    def __init__(self, x: int, y: int):
         self.x = x
         self.y = y
-        self.neighbors = set()
+        self.friend_neighbors = set()
+        self.enemy_neighbors = set()
         self.breaths = 4
 
     def set_influence(self, field: GameField):
         """Подсчет и настройка влияния соседей"""
+        # обход по соседним клеткам
+        death_list = []
         for i, j in (0, 1), (1, 0), (0, -1), (-1, 0):
             neighbor = field.get_obj_on_position(self.x + i, self.y + j)
+
             if not neighbor:
                 continue
             self.breaths -= 1
+
             if isinstance(neighbor, _Stone):
                 neighbor.close_breath()
 
                 if type(neighbor) is type(self):
-                    self.neighbors.add(neighbor)
-                    self.neighbors.update(neighbor.neighbors)
+                    self.friend_neighbors.add(neighbor)
+                    self.friend_neighbors.update(neighbor.friend_neighbors)
+                else:
+                    self.add_enemy(neighbor)
+                    neighbor.add_enemy(self)
+                    neighbor.check_to_death(field, death_list)
 
-        for neighbor in self.neighbors:
-            neighbor.add_neighbor(self)
+        # проверка на самоубийство
+        if not self.breaths:
+            try:
+                neighbor = self.friend_neighbors.pop()
 
-        for rand_neigh in self.neighbors:
+                if not neighbor.breaths:
+                    raise exc.IncorrectMove
+                self.friend_neighbors.add(neighbor)
+            except KeyError:
+                raise exc.IncorrectMove
+            except exc.IncorrectMove:
+                self.friend_neighbors.add(neighbor)
+
+        # обновление данных группы камней
+        for neighbor in self.friend_neighbors:
+            neighbor.add_friend(self)
+
+        # выравнивание дыханий текущего камня с группой
+        for rand_neigh in self.friend_neighbors:
             self.breaths = rand_neigh.breaths
             break
 
+        self._kill_enemy(field, death_list)
+
     def close_breath(self):
+        """Закрыть дыхание у группы камней"""
         self.breaths -= 1
-        for neighbor in self.neighbors:
+        for neighbor in self.friend_neighbors:
             neighbor.breaths -= 1
 
-    def add_neighbor(self, neighbor):
-        self.breaths += neighbor.breaths
-        self.neighbors.add(neighbor)
+    def add_breath(self):
+        """Добавить ранее закрытое дыхание"""
+        self.breaths += 1
+        for neighbor in self.friend_neighbors:
+            neighbor.breaths += 1
 
-    def rm(self):
-        pass
+    def add_friend(self, neighbor):
+        """Добавление камня к группе"""
+        self.breaths += neighbor.breaths
+        self.friend_neighbors.add(neighbor)
+
+    def add_enemy(self, enemy):
+        self.enemy_neighbors.add(enemy)
+
+    def check_to_death(self, field, death_list):
+        """Проверка на состояние смерти"""
+        if not self.breaths:
+            death_list.append(self)
+
+    def die(self, field: GameField) -> int:
+        """Уничтожение группы камней и возвращение количества убитых"""
+        neighbor_count = len(self.friend_neighbors)
+        for stone in (*self.friend_neighbors, self):
+            for enemy in stone.enemy_neighbors:
+                enemy.add_breath()
+                enemy.enemy_neighbors.remove(stone)
+
+            field.remove_stone_on_position(stone.x, stone.y)
+
+        return neighbor_count + 1
+
+    @staticmethod
+    def _kill_enemy(field, death_list):
+        for stone in death_list:
+            stone.die(field)
 
 
 class WhiteStone(_Stone):
