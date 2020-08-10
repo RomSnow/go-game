@@ -103,7 +103,11 @@ class _Stone:
 
 class WhiteStone(_Stone):
     """Класс белого камня"""
+    def __str__(self):
+        return '*'
 
 
 class BlackStone(_Stone):
     """Класс черного камня"""
+    def __str__(self):
+        return 'o'
