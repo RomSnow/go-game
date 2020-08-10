@@ -1,6 +1,7 @@
 """Модуль для работы с игровым полем"""
 
 import game_core.special_exceptions as exc
+import game_core.player as player
 
 
 class FieldParams:
@@ -33,11 +34,11 @@ class GameField:
         except IndexError:
             return 1
 
-    def set_stone_on_position(self, stone_type, x, y):
+    def set_stone_on_position(self, master: player.Player, x: int, y: int):
         if self._field[y][x]:
             raise exc.IncorrectMove
 
-        stone = stone_type(x, y)
+        stone = master.stone_type(x, y, master)
         self._field[y][x] = stone
         stone.set_influence(self)
         return stone

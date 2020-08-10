@@ -1,16 +1,17 @@
 """Классы игровых камней"""
-from game_core.field import GameField, exc
+from game_core.field import GameField, exc, player
 
 
 class _Stone:
     """Родительсий класс камней"""
 
-    def __init__(self, x: int, y: int):
+    def __init__(self, x: int, y: int, master: player.Player):
         self.x = x
         self.y = y
         self.friend_neighbors = set()
         self.enemy_neighbors = set()
         self.breaths = 4
+        self._master = master
 
     def set_influence(self, field: GameField):
         """Подсчет и настройка влияния соседей"""
@@ -95,10 +96,9 @@ class _Stone:
 
         return neighbor_count + 1
 
-    @staticmethod
-    def _kill_enemy(field, death_list):
+    def _kill_enemy(self, field, death_list):
         for stone in death_list:
-            stone.die(field)
+            self._master.add_hostages(stone.die(field))
 
 
 class WhiteStone(_Stone):

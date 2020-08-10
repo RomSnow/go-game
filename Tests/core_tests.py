@@ -3,15 +3,16 @@ import unittest
 import game_core.field as fld
 import game_core.stones as stones
 import game_core.special_exceptions as sp_exc
+import game_core.player as player
 
 
 class CoreTestCase(unittest.TestCase):
     def test_move_with_stone(self):
         """Тестирование основных функий взаимодействия с полем"""
         field = fld.GameField(fld.FieldParams(3, 3, 0))
-
+        master = player.Player(stones.BlackStone)
         # тест на позиционирование
-        stone = field.set_stone_on_position(stones.BlackStone, 0, 0)
+        stone = field.set_stone_on_position(master, 0, 0)
         self.assertEqual(field._field, [
             [stone, 0, 0],
             [0, 0, 0],
@@ -29,19 +30,20 @@ class CoreTestCase(unittest.TestCase):
 
     def test_stone_group(self):
         field = fld.GameField(fld.FieldParams(3, 3, 0))
-        first_stone = field.set_stone_on_position(stones.BlackStone, 0, 1)
+        master = player.Player(stones.BlackStone)
+        first_stone = field.set_stone_on_position(master, 0, 1)
 
-        second_stone = field.set_stone_on_position(stones.BlackStone, 0, 2)
+        second_stone = field.set_stone_on_position(master, 0, 2)
 
         self.assertTrue(first_stone.breaths == second_stone.breaths == 3)
 
-        third_stone = field.set_stone_on_position(stones.BlackStone, 0, 0)
+        third_stone = field.set_stone_on_position(master, 0, 0)
 
         self.assertTrue(first_stone.breaths ==
                         second_stone.breaths ==
                         third_stone.breaths == 3)
 
-        fourth_stone = field.set_stone_on_position(stones.BlackStone, 1, 1)
+        fourth_stone = field.set_stone_on_position(master, 1, 1)
 
         self.assertTrue(first_stone.breaths ==
                         second_stone.breaths ==
@@ -50,12 +52,15 @@ class CoreTestCase(unittest.TestCase):
 
     def test_close_group_breath(self):
         field = fld.GameField(fld.FieldParams(3, 3, 0))
-        first_stone = field.set_stone_on_position(stones.BlackStone, 0, 1)
-        second_stone = field.set_stone_on_position(stones.BlackStone, 0, 2)
-        third_stone = field.set_stone_on_position(stones.BlackStone, 0, 0)
-        fourth_stone = field.set_stone_on_position(stones.BlackStone, 1, 1)
+        master = player.Player(stones.BlackStone)
+        enemy_master = player.Player(stones.WhiteStone)
 
-        enemy_stone = field.set_stone_on_position(stones.WhiteStone, 1, 0)
+        first_stone = field.set_stone_on_position(master, 0, 1)
+        second_stone = field.set_stone_on_position(master, 0, 2)
+        third_stone = field.set_stone_on_position(master, 0, 0)
+        fourth_stone = field.set_stone_on_position(master, 1, 1)
+
+        enemy_stone = field.set_stone_on_position(enemy_master, 1, 0)
         self.assertTrue(first_stone.breaths ==
                         second_stone.breaths ==
                         third_stone.breaths ==
@@ -65,25 +70,33 @@ class CoreTestCase(unittest.TestCase):
 
     def test_stone_death(self):
         field = fld.GameField(fld.FieldParams(3, 3, 0))
-        field.set_stone_on_position(stones.BlackStone, 0, 0)
-        white_stone_1 = field.set_stone_on_position(stones.WhiteStone, 0, 1)
-        white_stone_2 = field.set_stone_on_position(stones.WhiteStone, 1, 1)
-        white_stone_3 = field.set_stone_on_position(stones.WhiteStone, 1, 0)
+        black_master = player.Player(stones.BlackStone)
+        white_master = player.Player(stones.WhiteStone)
+
+        field.set_stone_on_position(black_master, 0, 0)
+        white_stone_1 = field.set_stone_on_position(white_master, 0, 1)
+        white_stone_2 = field.set_stone_on_position(white_master, 1, 1)
+        white_stone_3 = field.set_stone_on_position(white_master, 1, 0)
 
         self.assertEqual(field.get_obj_on_position(0, 0), 0)
         self.assertEqual(white_stone_1.breaths, 6)
         self.assertEqual(white_stone_2.breaths, 6)
         self.assertEqual(white_stone_3.breaths, 6)
 
+        self.assertEqual(white_master._hostages_count, 1)
+
     def test_group_death(self):
         field = fld.GameField(fld.FieldParams(3, 3, 0))
-        field.set_stone_on_position(stones.BlackStone, 0, 0)
-        field.set_stone_on_position(stones.BlackStone, 0, 1)
+        black_master = player.Player(stones.BlackStone)
+        white_master = player.Player(stones.WhiteStone)
 
-        white_stone_1 = field.set_stone_on_position(stones.WhiteStone, 1, 0)
-        white_stone_2 = field.set_stone_on_position(stones.WhiteStone, 1, 1)
-        white_stone_3 = field.set_stone_on_position(stones.WhiteStone, 1, 2)
-        white_stone_4 = field.set_stone_on_position(stones.WhiteStone, 0, 2)
+        field.set_stone_on_position(black_master, 0, 0)
+        field.set_stone_on_position(black_master, 0, 1)
+
+        white_stone_1 = field.set_stone_on_position(white_master, 1, 0)
+        white_stone_2 = field.set_stone_on_position(white_master, 1, 1)
+        white_stone_3 = field.set_stone_on_position(white_master, 1, 2)
+        white_stone_4 = field.set_stone_on_position(white_master, 0, 2)
 
         self.assertEqual(field.get_obj_on_position(0, 0), 0)
         self.assertEqual(field.get_obj_on_position(0, 1), 0)
@@ -92,6 +105,8 @@ class CoreTestCase(unittest.TestCase):
                         white_stone_2.breaths ==
                         white_stone_3.breaths ==
                         white_stone_4.breaths == 6)
+
+        self.assertEqual(white_master._hostages_count, 2)
 
 
 if __name__ == '__main__':
