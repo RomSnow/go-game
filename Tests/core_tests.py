@@ -108,6 +108,37 @@ class CoreTestCase(unittest.TestCase):
 
         self.assertEqual(white_master._hostages_count, 2)
 
+    def test_field_str(self):
+        field = fld.GameField(fld.FieldParams(6, 6))
+
+        self.assertEqual(str(field), ('.-.-.-.-.-.\n' +
+                                      '| | | | | |\n' +
+                                      '.-.-.-.-.-.\n' +
+                                      '| | | | | |\n' +
+                                      '.-.-.-.-.-.\n' +
+                                      '| | | | | |\n' +
+                                      '.-.-.-.-.-.\n' +
+                                      '| | | | | |\n' +
+                                      '.-.-.-.-.-.\n' +
+                                      '| | | | | |\n' +
+                                      '.-.-.-.-.-.\n')
+                         )
+
+        field.set_stone_on_position(player.Player(stones.BlackStone), 3, 3)
+
+        self.assertEqual(str(field), ('.-.-.-.-.-.\n' +
+                                      '| | | | | |\n' +
+                                      '.-.-.-.-.-.\n' +
+                                      '| | | | | |\n' +
+                                      '.-.-.-.-.-.\n' +
+                                      '| | | | | |\n' +
+                                      '.-.-.-o-.-.\n' +
+                                      '| | | | | |\n' +
+                                      '.-.-.-.-.-.\n' +
+                                      '| | | | | |\n' +
+                                      '.-.-.-.-.-.\n')
+                         )
+
 
 if __name__ == '__main__':
     unittest.main()

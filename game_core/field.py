@@ -8,17 +8,17 @@ class FieldParams:
     """Хранит параметры для поля"""
 
     def __init__(
-            self, lines_count, column_count, game_difficult
+            self, lines_count, column_count
     ):
         self.lines_count = lines_count
         self.column_count = column_count
-        self.game_difficult = game_difficult
 
 
 class GameField:
     """Содержит все данные и функции игрового поля"""
 
     def __init__(self, params: FieldParams):
+        self._params = params
         self._field = [
             [
                 0 for col in range(params.column_count)
@@ -45,3 +45,18 @@ class GameField:
 
     def remove_stone_on_position(self, x, y):
         self._field[y][x] = 0
+
+    def __str__(self):
+        field_str = ''
+
+        for line in self._field:
+            line_str = ''
+            for col in line:
+                if not col:
+                    col = '.'
+                line_str += f'{str(col)}-'
+
+            field_str += line_str[:-1] + '\n'
+            field_str += str(self._params.column_count * '| ')[:-1] + '\n'
+
+        return field_str[:-(self._params.column_count * 2 + 1)] + '\n'
