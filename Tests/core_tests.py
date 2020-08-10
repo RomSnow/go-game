@@ -9,7 +9,7 @@ import game_core.player as player
 class CoreTestCase(unittest.TestCase):
     def test_move_with_stone(self):
         """Тестирование основных функий взаимодействия с полем"""
-        field = fld.GameField(fld.FieldParams(3, 3, 0))
+        field = fld.GameField(fld.FieldParams(3, 3))
         master = player.Player(stones.BlackStone)
         # тест на позиционирование
         stone = field.set_stone_on_position(master, 0, 0)
@@ -29,7 +29,7 @@ class CoreTestCase(unittest.TestCase):
         self.assertEqual(field.get_obj_on_position(5, 5), 1)
 
     def test_stone_group(self):
-        field = fld.GameField(fld.FieldParams(3, 3, 0))
+        field = fld.GameField(fld.FieldParams(3, 3))
         master = player.Player(stones.BlackStone)
         first_stone = field.set_stone_on_position(master, 0, 1)
 
@@ -51,7 +51,7 @@ class CoreTestCase(unittest.TestCase):
                         fourth_stone.breaths == 5)
 
     def test_close_group_breath(self):
-        field = fld.GameField(fld.FieldParams(3, 3, 0))
+        field = fld.GameField(fld.FieldParams(3, 3))
         master = player.Player(stones.BlackStone)
         enemy_master = player.Player(stones.WhiteStone)
 
@@ -69,7 +69,7 @@ class CoreTestCase(unittest.TestCase):
         self.assertEqual(enemy_stone.breaths, 1)
 
     def test_stone_death(self):
-        field = fld.GameField(fld.FieldParams(3, 3, 0))
+        field = fld.GameField(fld.FieldParams(3, 3))
         black_master = player.Player(stones.BlackStone)
         white_master = player.Player(stones.WhiteStone)
 
@@ -86,7 +86,7 @@ class CoreTestCase(unittest.TestCase):
         self.assertEqual(white_master._hostages_count, 1)
 
     def test_group_death(self):
-        field = fld.GameField(fld.FieldParams(3, 3, 0))
+        field = fld.GameField(fld.FieldParams(3, 3))
         black_master = player.Player(stones.BlackStone)
         white_master = player.Player(stones.WhiteStone)
 
