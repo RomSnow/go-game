@@ -36,11 +36,15 @@ class GameField:
 
     def set_stone_on_position(self, master: player.Player, x: int, y: int):
         if self._field[y][x]:
-            raise exc.IncorrectMove
+            raise exc.BusyPoint
+
+        if (x, y) == master.last_move:
+            raise exc.KOException
 
         stone = master.stone_type(x, y, master)
-        self._field[y][x] = stone
         stone.set_influence(self)
+        self._field[y][x] = stone
+        master.last_move = (x, y)
         return stone
 
     def remove_stone_on_position(self, x, y):

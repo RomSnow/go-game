@@ -44,9 +44,10 @@ class _Stone:
                     raise exc.IncorrectMove
                 self.friend_neighbors.add(neighbor)
             except KeyError:
-                raise exc.IncorrectMove
+                raise exc.SuicideMove
             except exc.IncorrectMove:
                 self.friend_neighbors.add(neighbor)
+                raise exc.SuicideMove
 
         # обновление данных группы камней
         for neighbor in self.friend_neighbors:

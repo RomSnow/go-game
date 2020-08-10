@@ -7,8 +7,9 @@ import game_core.player as player
 
 
 class CoreTestCase(unittest.TestCase):
+    """Тестирование основных функий взаимодействия с полем"""
+
     def test_move_with_stone(self):
-        """Тестирование основных функий взаимодействия с полем"""
         field = fld.GameField(fld.FieldParams(3, 3))
         master = player.Player(stones.BlackStone)
         # тест на позиционирование
@@ -21,7 +22,7 @@ class CoreTestCase(unittest.TestCase):
 
         # тест на невозможность повтороного позиционирования
         self.assertRaises(
-            sp_exc.IncorrectMove,
+            sp_exc.BusyPoint,
             field.set_stone_on_position, stones.BlackStone, 0, 0)
 
         # тест на обращение
@@ -67,6 +68,20 @@ class CoreTestCase(unittest.TestCase):
                         fourth_stone.breaths == 3)
 
         self.assertEqual(enemy_stone.breaths, 1)
+
+    def test_suicide_move(self):
+        field = fld.GameField(fld.FieldParams(3, 3))
+        master = player.Player(stones.BlackStone)
+        enemy_master = player.Player(stones.WhiteStone)
+
+        field.set_stone_on_position(master, 1, 0)
+        field.set_stone_on_position(master, 1, 1)
+        field.set_stone_on_position(master, 0, 2)
+
+        field.set_stone_on_position(enemy_master, 0, 0)
+
+        self.assertRaises(sp_exc.SuicideMove,
+                          field.set_stone_on_position, enemy_master, 0, 1)
 
     def test_stone_death(self):
         field = fld.GameField(fld.FieldParams(3, 3))
@@ -138,6 +153,18 @@ class CoreTestCase(unittest.TestCase):
                                       '| | | | | |\n' +
                                       '.-.-.-.-.-.\n')
                          )
+
+    def test_ko(self):
+        field = fld.GameField(fld.FieldParams(3, 4))
+        black_master = player.Player(stones.BlackStone)
+        white_master = player.Player(stones.WhiteStone)
+
+        stone = field.set_stone_on_position(black_master, 1, 0)
+
+        stone.die(field)
+
+        self.assertRaises(sp_exc.KOException, field.set_stone_on_position,
+                          black_master, 1, 0)
 
 
 if __name__ == '__main__':
