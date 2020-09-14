@@ -3,7 +3,11 @@ import sys
 
 
 def main(board_size: list):
-    game = gm.Game(gm.field.FieldParams(*board_size))
+    white_player = gm.player.Player(gm.stones.WhiteStone)
+    black_player = gm.player.Player(gm.stones.BlackStone)
+
+    game = gm.Game(gm.field.FieldParams(*board_size),
+                   white_player, black_player)
 
     while game.game_is_on:
         move_str = input().split()
