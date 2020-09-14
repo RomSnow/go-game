@@ -2,9 +2,8 @@ import game_core.game_manager as gm
 import sys
 
 
-def main():
-    field_size = (int(i) for i in sys.argv[1:])
-    game = gm.Game(gm.field.FieldParams(*field_size))
+def main(board_size: list):
+    game = gm.Game(gm.field.FieldParams(*board_size))
 
     while game.game_is_on:
         move_str = input().split()
@@ -19,4 +18,5 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    field_size = list(int(i) for i in sys.argv[1:])
+    main(field_size)
