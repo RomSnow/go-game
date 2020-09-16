@@ -26,6 +26,10 @@ class GameField:
             for lin in range(params.lines_count)
         ]
 
+    @property
+    def field_params(self):
+        return self._params
+
     def get_obj_on_position(self, x, y):
         try:
             if y < 0 or x < 0:

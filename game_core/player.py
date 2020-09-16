@@ -16,3 +16,7 @@ class Player:
     @property
     def hostages_count(self):
         return self._hostages_count
+
+    def reset(self):
+        self._hostages_count = 0
+        self.last_move = (-1, -1)
