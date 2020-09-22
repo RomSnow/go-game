@@ -20,3 +20,10 @@ class Player:
     def reset(self):
         self._hostages_count = 0
         self.last_move = (-1, -1)
+
+    def __str__(self):
+        stone_name = str(self.stone_type)
+        if 'White' in stone_name:
+            return 'черный'
+        elif 'Black' in stone_name:
+            return 'белый'
