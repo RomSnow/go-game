@@ -2,6 +2,18 @@ import game_core.game_manager as gm
 import sys
 
 
+def make_move(game: gm.Game, move_str: str):
+    move_data = move_str.split()
+    move = move_data[0]
+
+    if move == 'print':
+        game.print_field()
+        return
+
+    move_params = list(int(i) for i in move_data[1:])
+    game.make_move(move, *move_params)
+
+
 def main(board_size: list):
     white_player = gm.player.Player(gm.stones.WhiteStone)
     black_player = gm.player.Player(gm.stones.BlackStone)
@@ -10,15 +22,18 @@ def main(board_size: list):
                    white_player, black_player)
 
     while game.game_is_on:
-        move_str = input(f'Ходит {game.current_player}').split()
-        move = move_str[0]
-
-        if move == 'print':
-            game.print_field()
-            continue
-
-        move_params = list(int(i) for i in move_str[1:])
-        game.make_move(move, *move_params)
+        try:
+            make_move(game, input(f'Ходит {game.current_player}\n'))
+        except gm.exc.KOException:
+            print('Нарушено правило КО!')
+        except gm.exc.SuicideMove:
+            print('Самоубийственный ход!')
+        except gm.exc.BusyPoint:
+            print('Позиция уже занята!')
+        except gm.exc.IncorrectMove:
+            print('Невеный ход! /h для справки')
+        except IndexError:
+            print('Позиция вне поля!')
 
     white_player_points = game.get_point_count(white_player)
     black_player_points = game.get_point_count(black_player)
