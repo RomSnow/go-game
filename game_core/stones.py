@@ -2,7 +2,7 @@
 from game_core.field import GameField, exc, player
 
 
-class _Stone:
+class Stone:
     """Родительсий класс камней"""
 
     def __init__(self, x: int, y: int, master: player.Player):
@@ -24,7 +24,7 @@ class _Stone:
                 continue
             self.breaths -= 1
 
-            if isinstance(neighbor, _Stone):
+            if isinstance(neighbor, Stone):
                 neighbor.close_breath()
 
                 if type(neighbor) is type(self):
@@ -102,13 +102,15 @@ class _Stone:
             self._master.add_hostages(stone.die(field))
 
 
-class WhiteStone(_Stone):
+class WhiteStone(Stone):
     """Класс белого камня"""
+
     def __str__(self):
         return '*'
 
 
-class BlackStone(_Stone):
+class BlackStone(Stone):
     """Класс черного камня"""
+
     def __str__(self):
         return 'o'

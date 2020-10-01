@@ -1,5 +1,7 @@
 """Модуль для работы с игровым полем"""
 
+from dataclasses import dataclass
+
 import game_core.special_exceptions as exc
 import game_core.player as player
 
@@ -21,7 +23,7 @@ class GameField:
         self._params = params
         self._field = [
             [
-                0 for col in range(params.column_count)
+                None for col in range(params.column_count)
             ]
             for lin in range(params.lines_count)
         ]
@@ -36,7 +38,7 @@ class GameField:
                 raise IndexError
             return self._field[y][x]
         except IndexError:
-            return 1
+            return OutsideStone()
 
     def set_stone_on_position(self, master: player.Player, x: int, y: int):
         if self._field[y][x]:
@@ -51,8 +53,8 @@ class GameField:
         master.last_move = (x, y)
         return stone
 
-    def remove_stone_on_position(self, x, y):
-        self._field[y][x] = 0
+    def remove_stone_on_position(self, x: int, y: int):
+        self._field[y][x] = None
 
     def __str__(self):
         field_str = ''
@@ -68,3 +70,13 @@ class GameField:
             field_str += str(self._params.column_count * '| ')[:-1] + '\n'
 
         return field_str[:-(self._params.column_count * 2 + 1)] + '\n'
+
+
+class OutsideStone:
+    """Класс камней лежащих вне поля"""
+
+
+@dataclass
+class Point:
+    x: int
+    y: int

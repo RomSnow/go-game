@@ -15,9 +15,9 @@ class CoreTestCase(unittest.TestCase):
         # тест на позиционирование
         stone = field.set_stone_on_position(master, 0, 0)
         self.assertEqual(field._field, [
-            [stone, 0, 0],
-            [0, 0, 0],
-            [0, 0, 0]
+            [stone, None, None],
+            [None, None, None],
+            [None, None, None]
         ])
 
         # тест на невозможность повтороного позиционирования
@@ -27,7 +27,9 @@ class CoreTestCase(unittest.TestCase):
 
         # тест на обращение
         self.assertEqual(field.get_obj_on_position(0, 0), stone)
-        self.assertEqual(field.get_obj_on_position(5, 5), 1)
+        self.assertTrue(isinstance(
+            field.get_obj_on_position(5, 5), fld.OutsideStone)
+        )
 
     def test_stone_group(self):
         field = fld.GameField(fld.FieldParams(3, 3))
@@ -93,7 +95,7 @@ class CoreTestCase(unittest.TestCase):
         white_stone_2 = field.set_stone_on_position(white_master, 1, 1)
         white_stone_3 = field.set_stone_on_position(white_master, 1, 0)
 
-        self.assertEqual(field.get_obj_on_position(0, 0), 0)
+        self.assertEqual(field.get_obj_on_position(0, 0), None)
         self.assertEqual(white_stone_1.breaths, 6)
         self.assertEqual(white_stone_2.breaths, 6)
         self.assertEqual(white_stone_3.breaths, 6)
@@ -113,8 +115,8 @@ class CoreTestCase(unittest.TestCase):
         white_stone_3 = field.set_stone_on_position(white_master, 1, 2)
         white_stone_4 = field.set_stone_on_position(white_master, 0, 2)
 
-        self.assertEqual(field.get_obj_on_position(0, 0), 0)
-        self.assertEqual(field.get_obj_on_position(0, 1), 0)
+        self.assertEqual(field.get_obj_on_position(0, 0), None)
+        self.assertEqual(field.get_obj_on_position(0, 1), None)
 
         self.assertTrue(white_stone_1.breaths ==
                         white_stone_2.breaths ==

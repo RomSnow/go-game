@@ -69,46 +69,47 @@ class Game:
         for line in range(self._field.field_params.lines_count):
             for col in range(self._field.field_params.column_count):
                 if isinstance(self._field.get_obj_on_position(col, line),
-                              stones._Stone):
+                              stones.Stone):
                     continue
-                if self._breadth_first_search(list(), stone, (line, col),
+                if self._breadth_first_search(list(), stone,
+                                              field.Point(line, col),
                                               self._field, True):
                     territory_count += 1
 
         return territory_count
 
-    def _breadth_first_search(self, visited_points: list, stone_type,
-                              point, board: field.GameField, is_last_good):
+    def _breadth_first_search(self, visited_points, stone_type,
+                              point: field.Point,
+                              board: field.GameField, is_last_good):
         """Проверка на принадлежность точки к територри камня"""
 
         if point in visited_points:
             return is_last_good
 
-        current_obj = board.get_obj_on_position(point[1], point[0])
+        current_obj = board.get_obj_on_position(point.y, point.x)
 
         new_is_last_good = is_last_good
-        if isinstance(current_obj, stone_type) or current_obj == 1:
+        if (isinstance(current_obj, stone_type) or
+                isinstance(current_obj, field.OutsideStone)):
             return True
-        elif current_obj == 0:
-            pass
-        else:
+        elif current_obj is not None:
             return False
 
         visited_points.append(point)
 
-        return (self._breadth_first_search(visited_points, stone_type,
-                                           (point[0] + 1, point[1]),
-                                           board, new_is_last_good) and
-                self._breadth_first_search(visited_points, stone_type,
-                                           (point[0] - 1, point[1]),
-                                           board, new_is_last_good) and
-                self._breadth_first_search(visited_points, stone_type,
-                                           (point[0], point[1] + 1),
-                                           board, new_is_last_good) and
-                self._breadth_first_search(visited_points, stone_type,
-                                           (point[0], point[1] - 1),
-                                           board, new_is_last_good)
-                )
+        return self._do_disperse(visited_points, stone_type,
+                                 point, board, new_is_last_good)
+
+    def _do_disperse(self, visited_points, stone_type,
+                     point: field.Point, board, new_is_last_good):
+        for delta_x, delta_y in (-1, 0), (1, 0), (0, 1), (0, -1):
+            new_point = field.Point(point.x + delta_x, point.y + delta_y)
+            if not self._breadth_first_search(visited_points, stone_type,
+                                              new_point, board,
+                                              new_is_last_good):
+                return False
+
+        return True
 
     def _switch_player(self):
         self._current_player = next(self._players)
