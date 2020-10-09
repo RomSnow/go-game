@@ -8,7 +8,7 @@ class GameManagerTests(unittest.TestCase):
     black_player = gm.player.Player(gm.stones.BlackStone)
 
     def test_make_move(self):
-        game = gm.Game(gm.field.FieldParams(9, 9),
+        game = gm.Game(gm.field.FieldParams(9),
                        self.white_player, self.black_player)
         first_player = game.current_player
         game.make_move('pass', 0, 0)
@@ -21,7 +21,7 @@ class GameManagerTests(unittest.TestCase):
         self.black_player.reset()
 
     def test_end_game(self):
-        game = gm.Game(gm.field.FieldParams(9, 9),
+        game = gm.Game(gm.field.FieldParams(9),
                        self.white_player, self.black_player)
         game.make_move('pass')
         game.make_move('pass')
@@ -31,7 +31,7 @@ class GameManagerTests(unittest.TestCase):
         self.white_player.reset()
 
     def test_point_counter(self):
-        game = gm.Game(gm.field.FieldParams(9, 9),
+        game = gm.Game(gm.field.FieldParams(9),
                        self.white_player, self.black_player)
         for i in range(1, 10):
             game.make_move('move', 2, i)
