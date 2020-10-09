@@ -9,11 +9,9 @@ import game_core.player as player
 class FieldParams:
     """Хранит параметры для поля"""
 
-    def __init__(
-            self, lines_count, column_count
-    ):
-        self.lines_count = lines_count
-        self.column_count = column_count
+    def __init__(self, size):
+        self.lines_count = size
+        self.column_count = size
 
 
 class GameField:

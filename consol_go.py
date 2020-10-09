@@ -1,5 +1,6 @@
 import game_core.game_manager as gm
 import sys
+import argparse
 
 
 def make_move(game: gm.Game, move_str: str):
@@ -14,11 +15,13 @@ def make_move(game: gm.Game, move_str: str):
     game.make_move(move, *move_params)
 
 
-def main(board_size: list):
+def main(board_size: int, is_AI_mode: bool):
+    if is_AI_mode:
+        print('AI_mode')
     white_player = gm.player.Player(gm.stones.WhiteStone)
     black_player = gm.player.Player(gm.stones.BlackStone)
 
-    game = gm.Game(gm.field.FieldParams(*board_size),
+    game = gm.Game(gm.field.FieldParams(board_size),
                    white_player, black_player)
 
     while game.game_is_on:
@@ -49,9 +52,21 @@ def main(board_size: list):
 
     print('Начать заново? y/n')
     if input() == 'y':
-        main(board_size)
+        main(board_size, is_AI_mode)
+
+
+def init_parser(parser_obj: argparse.ArgumentParser):
+    parser_obj.add_argument('--size', action='store',
+                            nargs=1, type=int, default=[9],
+                            help='Set field size')
+    parser_obj.add_argument('--AI', action='store_true',
+                            help='Set game with AI mode')
 
 
 if __name__ == '__main__':
-    field_size = list(int(i) for i in sys.argv[1:])
-    main(field_size)
+    parser = argparse.ArgumentParser(description='The console Go game.'
+                                                 ' The controls can be '
+                                                 'found in file "Readme.md"')
+    init_parser(parser)
+    args = parser.parse_args(sys.argv[1:])
+    main(args.size[0], args.AI)
