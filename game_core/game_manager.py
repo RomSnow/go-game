@@ -5,6 +5,7 @@ import game_core.field as field
 import game_core.player as player
 import game_core.stones as stones
 import game_core.special_exceptions as exc
+import game_core.ai_enemy as ai
 
 
 class Game:
@@ -12,13 +13,18 @@ class Game:
 
     def __init__(self, field_params: field.FieldParams,
                  first_player: player.Player,
-                 second_player: player.Player):
+                 second_player: player.Player,
+                 is_ai_mode=False):
 
         self._field = field.GameField(field_params)
         self._players = cycle([first_player, second_player])
         self._game_is_on = True
+        self._is_ai_mode = False
         self._current_player = next(self._players)
         self._is_pass = False
+
+        if is_ai_mode:
+            self._init_ai(second_player)
 
     @property
     def game_is_on(self):
@@ -57,6 +63,9 @@ class Game:
             raise exc.IncorrectMove
 
         self._switch_player()
+
+    def make_ai_move(self):
+        self._ai.make_move(self)
 
     def print_field(self):
         print(self._field)
@@ -121,3 +130,8 @@ class Game:
 
     def _switch_player(self):
         self._current_player = next(self._players)
+
+    def _init_ai(self, ai_player: player.Player):
+        self._ai = ai.Ai_enemy(ai_player)
+        ai_player.set_ai_mode()
+        self._is_ai_mode = True

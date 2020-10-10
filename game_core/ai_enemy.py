@@ -1,12 +1,10 @@
 import random
 
-import game_core.game_manager as gm
 
-
-class AI_enemy:
+class Ai_enemy:
     """Класс с реализацией компьютерного противника"""
 
-    def __init__(self, player: gm.player.Player):
+    def __init__(self, player):
         self._player = player
 
     @property
@@ -14,7 +12,7 @@ class AI_enemy:
         return self._player
 
     @staticmethod
-    def make_move(game: gm.Game):
+    def make_move(game):
         size = game.field_size
         move_coordinates = (random.randint(1, size),
                             random.randint(1, size))
@@ -22,11 +20,11 @@ class AI_enemy:
         if game.is_field_filled:
             game.make_move('pass')
 
-        no_completed = False
+        no_completed = True
         while no_completed:
             try:
                 game.make_move('move', *move_coordinates)
             except Exception:
                 continue
 
-            no_completed = True
+            no_completed = False

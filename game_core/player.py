@@ -5,7 +5,7 @@ class Player:
     """Содержит основные данные, для каждого игрока"""
 
     def __init__(self, stone_type, is_AI=False):
-        self.is_AI = is_AI
+        self._is_AI = is_AI
         self._hostages_count = 0
         self.stone_type = stone_type
         self.last_move = (-1, -1)
@@ -14,8 +14,15 @@ class Player:
         self._hostages_count += count
 
     @property
+    def is_ai(self):
+        return self._is_AI
+
+    @property
     def hostages_count(self):
         return self._hostages_count
+
+    def set_ai_mode(self):
+        self._is_AI = True
 
     def reset(self):
         self._hostages_count = 0

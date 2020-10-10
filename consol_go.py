@@ -1,9 +1,10 @@
-import game_core.game_manager as gm
 import sys
 import argparse
 
+import game_core.game_manager as gm
 
-def make_move(game: gm.Game, move_str: str):
+
+def make_move(game: gm.Game, move_str: str, is_ai_mode: bool):
     move_data = move_str.split()
     move = move_data[0]
 
@@ -13,6 +14,8 @@ def make_move(game: gm.Game, move_str: str):
 
     move_params = list(int(i) for i in move_data[1:])
     game.make_move(move, *move_params)
+    if is_ai_mode:
+        game.make_ai_move()
 
 
 def main(board_size: int, is_AI_mode: bool):
@@ -20,11 +23,12 @@ def main(board_size: int, is_AI_mode: bool):
     black_player = gm.player.Player(gm.stones.BlackStone)
 
     game = gm.Game(gm.field.FieldParams(board_size),
-                   white_player, black_player)
+                   white_player, black_player, is_AI_mode)
 
     while game.game_is_on:
         try:
-            make_move(game, input(f'Ходит {game.current_player}\n'))
+            make_move(game, input(f'Ходит {game.current_player}\n'),
+                      is_AI_mode)
         except gm.exc.KOException:
             print('Нарушено правило КО!')
         except gm.exc.SuicideMove:
