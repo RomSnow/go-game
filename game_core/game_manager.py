@@ -25,8 +25,16 @@ class Game:
         return self._game_is_on
 
     @property
+    def is_field_filled(self):
+        return self._field.is_filled
+
+    @property
     def current_player(self):
         return self._current_player
+
+    @property
+    def field_size(self):
+        return self._field.field_params.column_count
 
     def make_move(self, move: str, x=-1, y=-1):
         """Проделывает ход, соответсвующий параметру move

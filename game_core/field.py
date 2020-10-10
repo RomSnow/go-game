@@ -30,6 +30,14 @@ class GameField:
     def field_params(self):
         return self._params
 
+    @property
+    def is_filled(self):
+        for i in self._field:
+            for j in i:
+                if j is None:
+                    return False
+        return True
+
     def get_obj_on_position(self, x, y):
         try:
             if y < 0 or x < 0:

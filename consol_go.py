@@ -16,8 +16,6 @@ def make_move(game: gm.Game, move_str: str):
 
 
 def main(board_size: int, is_AI_mode: bool):
-    if is_AI_mode:
-        print('AI_mode')
     white_player = gm.player.Player(gm.stones.WhiteStone)
     black_player = gm.player.Player(gm.stones.BlackStone)
 
