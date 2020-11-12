@@ -42,6 +42,9 @@ class Game:
     def field_size(self):
         return self._field.field_params.column_count
 
+    def get_stone_on_position(self, x, y) -> stones.Stone:
+        return self._field.get_obj_on_position(x - 1, y - 1)
+
     def make_move(self, move: str, x=-1, y=-1):
         """Проделывает ход, соответсвующий параметру move
 
