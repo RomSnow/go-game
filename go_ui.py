@@ -1,11 +1,12 @@
 import sys
+from PyQt5.QtWidgets import QApplication
 
 from game_core import game_manager as gm
 from graphics import game_window
 
 
 def main(field_size: int):
-    app = game_window.qtw.QApplication([])
+    app = QApplication([])
     white_player = gm.player.Player(gm.stones.WhiteStone)
     black_player = gm.player.Player(gm.stones.BlackStone)
 
@@ -13,7 +14,7 @@ def main(field_size: int):
                    white_player,
                    black_player)
 
-    window = game_window.GameWindow(field_size, 500, game)
+    window = game_window.GameWindow(field_size, game)
     sys.exit(app.exec_())
 
 

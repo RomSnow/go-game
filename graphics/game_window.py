@@ -1,4 +1,5 @@
 import sys
+
 from PyQt5 import QtWidgets as qtw
 
 from graphics.cell_button import CellButton
@@ -7,10 +8,10 @@ from game_core import game_manager as gm
 
 class GameWindow(qtw.QWidget):
 
-    def __init__(self, field_size: int, window_size: int,
-                 game: gm.Game):
+    def __init__(self, field_size: int, game: gm.Game):
         super().__init__()
         self._game = game
+        self._field_buttons = list()
         self._set_ui(field_size)
         self.show()
 
@@ -27,25 +28,47 @@ class GameWindow(qtw.QWidget):
 
         for i in range(field_size):
             for j in range(field_size):
+                button = CellButton((j, i), field_size, self._game, self)
+                self._field_buttons.append(button)
                 field_grid.addWidget(
-                    CellButton((j, i), field_size, self._game), i, j)
+                    button, i, j
+                )
 
         main_grid.addLayout(field_grid, 0, 0)
 
-    @staticmethod
-    def _set_menu(main_grid: qtw.QGridLayout):
+    def _set_menu(self, main_grid: qtw.QGridLayout):
+        self._move_line = qtw.QLabel(f'Ход игрока: {self._game.current_player}')
+        pass_button = qtw.QPushButton('Pass')
         save_button = qtw.QPushButton('Save')
         exit_button = qtw.QPushButton('Exit')
-        menu_grid = qtw.QGridLayout()
-        menu_grid.setColumnMinimumWidth(0, 100)
+        button_grid = qtw.QGridLayout()
 
-        menu_grid.addWidget(save_button, 0, 4)
-        menu_grid.addWidget(exit_button, 0, 5)
+        pass_button.clicked.connect(self._pass_move)
+        exit_button.clicked.connect(qtw.qApp.exit)
+
+        button_grid.addWidget(pass_button, 0, 1)
+        button_grid.addWidget(save_button, 0, 2)
+        button_grid.addWidget(exit_button, 0, 3)
+
+        menu_grid = qtw.QGridLayout()
+        menu_grid.addWidget(self._move_line, 0, 0)
+        menu_grid.addLayout(button_grid, 0, 1)
+        menu_grid.setColumnMinimumWidth(0, 200)
 
         main_grid.addLayout(menu_grid, 1, 0)
 
+    def _pass_move(self):
+        self._game.make_move('pass')
+        self.update()
 
-# if __name__ == '__main__':
-#     app = qtw.QApplication([])
-#     win = GameWindow(9, 500)
-#     sys.exit(app.exec_())
+    def update(self):
+        for button in self._field_buttons:
+            button.redraw()
+
+        self._move_line.setText(f'Ход игрока: {self._game.current_player}')
+
+
+if __name__ == '__main__':
+    app = qtw.QApplication([])
+    win = GameWindow(9, None)
+    sys.exit(app.exec_())
