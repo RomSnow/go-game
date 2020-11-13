@@ -11,8 +11,8 @@ class CellButton(QPushButton):
     def __init__(self, position: tuple, field_size: int,
                  game: gm.Game, game_window):
         super().__init__()
-        self._x = position[0]
-        self._y = position[1]
+        self._x = position[0] + 1
+        self._y = position[1] + 1
         self._field_size = field_size
         self._game = game
         self._game_window = game_window
@@ -66,3 +66,6 @@ class CellButton(QPushButton):
 
         self.setIcon(QIcon(f'{os.path.dirname(__file__)}/{stone_icon}'))
         self.setIconSize(QSize(300 / self._field_size, 100))
+
+    def set_game_condition(self, game: gm.Game):
+        self._game = game

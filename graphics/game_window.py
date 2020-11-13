@@ -8,11 +8,12 @@ from game_core import game_manager as gm
 
 class GameWindow(qtw.QWidget):
 
-    def __init__(self, field_size: int, game: gm.Game):
+    def __init__(self, game_params: gm.GameParams):
         super().__init__()
-        self._game = game
+        self._game_params = game_params
+        self._game = gm.create_game(game_params)
         self._field_buttons = list()
-        self._set_ui(field_size)
+        self._set_ui(self._game.field_size)
         self.show()
 
     def _set_ui(self, field_size):
@@ -66,6 +67,12 @@ class GameWindow(qtw.QWidget):
             button.redraw()
 
         self._move_line.setText(f'Ход игрока: {self._game.current_player}')
+
+        if not self._game.game_is_on:
+            self._game = gm.create_game(self._game_params)
+            for button in self._field_buttons:
+                button.set_game_condition(self._game)
+            self.update()
 
 
 if __name__ == '__main__':
