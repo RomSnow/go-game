@@ -6,6 +6,8 @@ import game_core.player as player
 import game_core.stones as stones
 import game_core.special_exceptions as exc
 import game_core.ai_enemy as ai
+from game_core.game_modes import GameModes
+from game_core.game_params import GameParams
 
 
 class Game:
@@ -138,3 +140,21 @@ class Game:
         self._ai = ai.Ai_enemy(ai_player)
         ai_player.set_ai_mode()
         self._is_ai_mode = True
+
+
+def create_game(game_params: GameParams) -> Game:
+    is_ai_mode = False
+    is_white_ai = False
+    is_black_ai = False
+    if game_params.game_mode == GameModes.ai:
+        is_ai_mode = True
+        if game_params.main_player == 'white':
+            is_black_ai = True
+        else:
+            is_white_ai = True
+
+    white_player = player.Player(stones.WhiteStone, is_white_ai)
+    black_player = player.Player(stones.BlackStone, is_black_ai)
+
+    return Game(game_params.field_params,
+                white_player, black_player, is_ai_mode)
