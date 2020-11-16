@@ -2,14 +2,15 @@ import sys
 
 from PyQt5 import QtWidgets as qtw
 
-from graphics.cell_button import CellButton
 from game_core import game_manager as gm
+from graphics.cell_button import CellButton
 
 
 class GameWindow(qtw.QWidget):
 
     def __init__(self, game_params: gm.GameParams):
         super().__init__()
+        self._win_close = False
         self._game_params = game_params
         self._game = gm.create_game(game_params)
         self._field_buttons = list()
@@ -69,10 +70,31 @@ class GameWindow(qtw.QWidget):
         self._move_line.setText(f'Ход игрока: {self._game.current_player}')
 
         if not self._game.game_is_on:
+            self._restart_game()
+            if not self._win_close:
+                self.update()
+
+    def _restart_game(self):
+        result = self._game.get_result()
+        white_str = f'Белый: {result["Белый"]} очков'
+        black_str = f'Черный: {result["Черный"]} очков'
+        win_string = f'Победитель: {result["Победитель"]} игрок'
+        result_str = f'{white_str}\n{black_str}\n{win_string}\nНачать заново?'
+
+        reply = qtw.QMessageBox.question(self, 'Restart',
+                                         result_str,
+                                         qtw.QMessageBox.Yes |
+                                         qtw.QMessageBox.No,
+                                         qtw.QMessageBox.No)
+        #
+        if reply == qtw.QMessageBox.Yes:
             self._game = gm.create_game(self._game_params)
             for button in self._field_buttons:
                 button.set_game_condition(self._game)
-            self.update()
+
+        else:
+            self._win_close = True
+            self.close()
 
 
 if __name__ == '__main__':
