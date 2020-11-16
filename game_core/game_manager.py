@@ -60,6 +60,9 @@ class Game:
                                               x - 1, y - 1)
             self._is_pass = False
 
+            if self._field.is_filled:
+                self._game_is_on = False
+
         elif move == 'pass':
             if self._is_pass:
                 self._game_is_on = False
