@@ -14,19 +14,21 @@ class Game:
     """Класс, хранящий все данные текущей игры и управляющий ее ходом"""
 
     def __init__(self, field_params: field.FieldParams,
-                 first_player: player.Player,
-                 second_player: player.Player,
+                 white_player: player.Player,
+                 black_player: player.Player,
                  is_ai_mode=False):
 
+        self._white_pl = white_player
+        self._back_pl = black_player
         self._field = field.GameField(field_params)
-        self._players = cycle([first_player, second_player])
+        self._players = cycle([white_player, black_player])
         self._game_is_on = True
         self._is_ai_mode = False
         self._current_player = next(self._players)
         self._is_pass = False
 
         if is_ai_mode:
-            self._init_ai(second_player)
+            self._init_ai(black_player)
 
     @property
     def game_is_on(self):
@@ -140,6 +142,14 @@ class Game:
         self._ai = ai.Ai_enemy(ai_player)
         ai_player.set_ai_mode()
         self._is_ai_mode = True
+
+    def get_result(self) -> dict:
+        white_point = self.get_point_count(self._white_pl)
+        black_point = self.get_point_count(self._back_pl)
+        return {'Черный': black_point,
+                'Белый': white_point,
+                'Победитель':
+                    'Белый' if white_point > black_point else 'Черный'}
 
 
 def create_game(game_params: GameParams) -> Game:
