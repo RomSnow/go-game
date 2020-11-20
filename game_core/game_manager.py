@@ -11,12 +11,12 @@ from game_core.game_params import GameParams
 
 
 class Game:
-    """Класс, хранящий все данные текущей игры и управляющий ее ходом"""
-
     def __init__(self, field_params: field.FieldParams,
                  white_player: player.Player,
                  black_player: player.Player,
-                 is_ai_mode=False):
+                 main_player: str,
+                 is_ai_mode=False
+                 ):
 
         self._white_pl = white_player
         self._back_pl = black_player
@@ -28,7 +28,17 @@ class Game:
         self._is_pass = False
 
         if is_ai_mode:
-            self._init_ai(black_player)
+            if main_player == 'white':
+                enemy = black_player
+            else:
+                enemy = white_player
+
+            self._init_ai(enemy)
+
+            if self.current_player == enemy:
+                self.make_ai_move()
+
+    """Класс, хранящий все данные текущей игры и управляющий ее ходом"""
 
     @property
     def game_is_on(self):
@@ -76,7 +86,6 @@ class Game:
 
         if self._is_ai_mode and not is_ai_move:
             self.make_ai_move()
-
 
     def make_ai_move(self):
         self._ai.make_move(self)
@@ -174,4 +183,5 @@ def create_game(game_params: GameParams) -> Game:
     black_player = player.Player(stones.BlackStone, is_black_ai)
 
     return Game(game_params.field_params,
-                white_player, black_player, is_ai_mode)
+                white_player, black_player, game_params.main_player,
+                is_ai_mode)

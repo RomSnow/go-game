@@ -17,6 +17,7 @@ class GameWindow(qtw.QWidget):
         self._game = gm.create_game(game_params)
         self._field_buttons = list()
         self._set_ui(self._game.field_size)
+        self.update()
         self.show()
 
     def _set_ui(self, field_size):
