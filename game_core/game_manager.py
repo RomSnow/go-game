@@ -49,7 +49,7 @@ class Game:
     def get_stone_on_position(self, x, y) -> stones.Stone:
         return self._field.get_obj_on_position(x - 1, y - 1)
 
-    def make_move(self, move: str, x=-1, y=-1):
+    def make_move(self, move: str, x=-1, y=-1, is_ai_move=False):
         """Проделывает ход, соответсвующий параметру move
 
             move == move - ставит фишку игрока на позицию x, y;
@@ -72,7 +72,10 @@ class Game:
         else:
             raise exc.IncorrectMove
 
-        self._switch_player()
+        if self._is_ai_mode and not is_ai_move:
+            self.make_ai_move()
+        else:
+            self._switch_player()
 
     def make_ai_move(self):
         self._ai.make_move(self)

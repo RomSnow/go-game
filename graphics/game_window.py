@@ -8,8 +8,10 @@ from graphics.cell_button import CellButton
 
 class GameWindow(qtw.QWidget):
 
-    def __init__(self, game_params: gm.GameParams):
+    def __init__(self, game_params: gm.GameParams,
+                 main_window: qtw.QMainWindow):
         super().__init__()
+        self._main_win = main_window
         self._win_close = False
         self._game_params = game_params
         self._game = gm.create_game(game_params)
@@ -41,16 +43,14 @@ class GameWindow(qtw.QWidget):
     def _set_menu(self, main_grid: qtw.QGridLayout):
         self._move_line = qtw.QLabel(f'Ход игрока: {self._game.current_player}')
         pass_button = qtw.QPushButton('Pass')
-        save_button = qtw.QPushButton('Save')
         exit_button = qtw.QPushButton('Exit')
         button_grid = qtw.QGridLayout()
 
         pass_button.clicked.connect(self._pass_move)
-        exit_button.clicked.connect(qtw.qApp.exit)
+        exit_button.clicked.connect(self.close)
 
         button_grid.addWidget(pass_button, 0, 1)
-        button_grid.addWidget(save_button, 0, 2)
-        button_grid.addWidget(exit_button, 0, 3)
+        button_grid.addWidget(exit_button, 0, 2)
 
         menu_grid = qtw.QGridLayout()
         menu_grid.addWidget(self._move_line, 0, 0)
@@ -96,8 +96,5 @@ class GameWindow(qtw.QWidget):
             self._win_close = True
             self.close()
 
-
-if __name__ == '__main__':
-    app = qtw.QApplication([])
-    win = GameWindow(9, None)
-    sys.exit(app.exec_())
+    def closeEvent(self, a0) -> None:
+        self._main_win.show()

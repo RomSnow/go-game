@@ -8,4 +8,5 @@ from game_core.game_modes import GameModes
 class GameParams:
     game_mode: GameModes
     field_params: FieldParams
+    is_time_mode: bool
     main_player: str = 'white'

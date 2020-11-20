@@ -23,7 +23,7 @@ class Ai_enemy:
         no_completed = True
         while no_completed:
             try:
-                game.make_move('move', *move_coordinates)
+                game.make_move('move', *move_coordinates, True)
             except Exception:
                 continue
 
