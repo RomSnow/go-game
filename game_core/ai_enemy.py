@@ -14,14 +14,14 @@ class Ai_enemy:
     @staticmethod
     def make_move(game):
         size = game.field_size
-        move_coordinates = (random.randint(1, size),
-                            random.randint(1, size))
 
         if game.is_field_filled:
             game.make_move('pass')
 
         no_completed = True
         while no_completed:
+            move_coordinates = (random.randint(1, size),
+                                random.randint(1, size))
             try:
                 game.make_move('move', *move_coordinates, True)
             except Exception:

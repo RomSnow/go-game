@@ -72,10 +72,11 @@ class Game:
         else:
             raise exc.IncorrectMove
 
+        self._switch_player()
+
         if self._is_ai_mode and not is_ai_move:
             self.make_ai_move()
-        else:
-            self._switch_player()
+
 
     def make_ai_move(self):
         self._ai.make_move(self)

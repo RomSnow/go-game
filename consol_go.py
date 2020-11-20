@@ -14,8 +14,6 @@ def make_move(game: gm.Game, move_str: str, is_ai_mode: bool):
 
     move_params = list(int(i) for i in move_data[1:])
     game.make_move(move, *move_params)
-    if is_ai_mode:
-        game.make_ai_move()
 
 
 def main(board_size: int, is_AI_mode: bool):
