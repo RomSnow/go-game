@@ -8,6 +8,7 @@ import game_core.special_exceptions as exc
 import game_core.ai_enemy as ai
 from game_core.game_modes import GameModes
 from game_core.game_params import GameParams
+from web.connect_service import ConnectionService
 
 
 class Game:
@@ -15,7 +16,8 @@ class Game:
                  white_player: player.Player,
                  black_player: player.Player,
                  main_player: str,
-                 is_ai_mode=False
+                 is_ai_mode=False,
+                 connect_service: ConnectionService = None
                  ):
 
         self._white_pl = white_player
@@ -168,7 +170,8 @@ class Game:
                     'Белый' if white_point > black_point else 'Черный'}
 
 
-def create_game(game_params: GameParams) -> Game:
+def create_game(game_params: GameParams,
+                connection_service: ConnectionService = None) -> Game:
     is_ai_mode = False
     is_white_ai = False
     is_black_ai = False
@@ -184,4 +187,4 @@ def create_game(game_params: GameParams) -> Game:
 
     return Game(game_params.field_params,
                 white_player, black_player, game_params.main_player,
-                is_ai_mode)
+                is_ai_mode, connection_service)

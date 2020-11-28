@@ -4,6 +4,9 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QIcon
 
 import graphics.game_window as game_win
+from game_core.game_modes import GameModes
+from web.guest_room import GuestRoom
+from web.host_room import HostRoom
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -57,9 +60,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.online_button.setFont(font)
         self.online_button.game_type = game_win.gm.GameModes.online
         self.online_button.clicked.connect(lambda _t:
-                                       self._game_type_buttons_func(
-                                           self.online_button
-                                       ))
+                                           self._game_type_buttons_func(
+                                               self.online_button
+                                           ))
         # local_button
         self.local_button = QtWidgets.QPushButton(self.verticalLayoutWidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred,
@@ -73,9 +76,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self._game_type_buttons.append(self.local_button)
         self.local_button.game_type = game_win.gm.GameModes.local
         self.local_button.clicked.connect(lambda _t:
-                                       self._game_type_buttons_func(
-                                           self.local_button
-                                       ))
+                                          self._game_type_buttons_func(
+                                              self.local_button
+                                          ))
         # ai_button
         self.ai_button = QtWidgets.QPushButton(self.verticalLayoutWidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Maximum,
@@ -185,6 +188,42 @@ class MainWindow(QtWidgets.QMainWindow):
         self.start_button.setFont(font)
         self.verticalLayout.addWidget(self.start_button)
         self.start_button.clicked.connect(self._play_button_func)
+        # create_button
+        self.create_button = QtWidgets.QPushButton(self.verticalLayoutWidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred,
+                                           QtWidgets.QSizePolicy.Preferred)
+        self.create_button.setSizePolicy(sizePolicy)
+        font = QtGui.QFont()
+        font.setFamily("Sans")
+        font.setPointSize(18)
+        self.create_button.setFont(font)
+        self.verticalLayout.addWidget(self.create_button)
+        self.create_button.clicked.connect(self._create_button_func)
+        self.create_button.hide()
+        # connect_button
+        self.connect_button = QtWidgets.QPushButton(self.verticalLayoutWidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred,
+                                           QtWidgets.QSizePolicy.Maximum)
+        self.connect_button.setSizePolicy(sizePolicy)
+        font = QtGui.QFont()
+        font.setFamily("Sans")
+        font.setPointSize(18)
+        self.connect_button.setFont(font)
+        self.verticalLayout.addWidget(self.connect_button)
+        self.connect_button.hide()
+        self.connect_button.clicked.connect(self._connect_button_func)
+        MainWindow.setCentralWidget(self.centralwidget)
+        # record_button
+        self.record_button = QtWidgets.QPushButton(self.verticalLayoutWidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred,
+                                           QtWidgets.QSizePolicy.Maximum)
+        self.record_button.setSizePolicy(sizePolicy)
+        font = QtGui.QFont()
+        font.setFamily("Sans")
+        font.setPointSize(18)
+        self.record_button.setFont(font)
+        self.verticalLayout.addWidget(self.record_button)
+        self.record_button.clicked.connect(self._record_button_func)
         MainWindow.setCentralWidget(self.centralwidget)
 
     def retranslateUi(self, MainWindow):
@@ -202,6 +241,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.time_game_check.setText(_translate("MainWindow",
                                                 "Игра на время"))
         self.start_button.setText(_translate("MainWindow", "Играть"))
+        self.create_button.setText(_translate("MainWindow", "Создать"))
+        self.connect_button.setText(_translate("MainWindow", "Подключиться"))
+        self.record_button.setText(_translate("MainWindow", "Рекорды"))
 
     def _play_button_func(self):
         game_params = game_win.gm.GameParams(
@@ -216,6 +258,16 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def _game_type_buttons_func(self, clicked_button):
         self._game_mode = clicked_button.game_type
+        if self._game_mode == GameModes.online:
+            self.connect_button.show()
+            self.create_button.show()
+            self.start_button.hide()
+            self.record_button.hide()
+        else:
+            self.connect_button.hide()
+            self.create_button.hide()
+            self.start_button.show()
+            self.record_button.show()
         for button in self._game_type_buttons:
             if button == clicked_button:
                 button.setSizePolicy(QtWidgets.QSizePolicy(
@@ -238,6 +290,62 @@ class MainWindow(QtWidgets.QMainWindow):
                 button.setSizePolicy(QtWidgets.QSizePolicy(
                     QtWidgets.QSizePolicy.Maximum,
                     QtWidgets.QSizePolicy.Preferred))
+
+    def _connect_button_func(self):
+        address, ok = QtWidgets.QInputDialog.getText(self,
+                                                     'Подключение',
+                                                     'Введите код игры:')
+        if not ok:
+            return
+
+        guest_room = GuestRoom(address)
+        game_params = guest_room.set_connection()
+
+        game_window = game_win.GameWindow(game_params, self, guest_room)
+        self.hide()
+
+    def _create_button_func(self):
+        host_room = HostRoom()
+        address = host_room.get_address_code()
+        try:
+            reply = AddressOutMessage(address)
+        except ExitException:
+            host_room.close()
+            return
+
+        game_params = game_win.gm.GameParams(
+            game_mode=self._game_mode,
+            field_params=game_win.gm.field.FieldParams(self.field_size_spin.
+                                                       value()),
+            main_player=self._main_player,
+            is_time_mode=self.time_game_check.isChecked()
+        )
+
+        host_room.wait_connection(game_params)
+
+        game_window = game_win.GameWindow(game_params, self, host_room)
+        self.hide()
+
+    def _record_button_func(self):
+        pass
+
+
+class AddressOutMessage(QtWidgets.QMessageBox):
+    def __init__(self, address: str):
+        super().__init__()
+        self.setWindowTitle('Подключение')
+        self.setText(f'Код игры: {address}')
+        self.setInformativeText('Ожидание подключения')
+        ext_button = self.addButton('Отмена',
+                                    QtWidgets.QMessageBox.RejectRole)
+        self.exec()
+
+        if self.clickedButton() == ext_button:
+            raise ExitException
+
+
+class ExitException(Exception):
+    pass
 
 
 if __name__ == '__main__':

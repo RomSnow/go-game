@@ -1,6 +1,7 @@
 import socket
 
 import web.web_exceptions as web_exc
+from game_core.game_params import GameParams
 from web.connect_service import ConnectionService
 
 
@@ -21,11 +22,10 @@ class HostRoom(ConnectionService):
 
         return sock
 
-    def wait_connection(self) -> bool:
-        print("Waiting connection...")
+    def wait_connection(self, game_params: GameParams) -> bool:
         self._socket.listen(1)
         self._socket.accept()
-        print("Connection passed!")
+        self._socket.sendall(str(game_params).encode())
         return True
 
     @staticmethod
@@ -47,10 +47,3 @@ class HostRoom(ConnectionService):
             code_str += str(count) + chr(65 + off)
 
         return code_str
-
-
-if __name__ == '__main__':
-    room = HostRoom()
-    print(room.get_address_code())
-    room.wait_connection()
-    room.close()

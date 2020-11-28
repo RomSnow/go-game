@@ -4,12 +4,14 @@ from PyQt5 import QtWidgets as qtw
 
 from game_core import game_manager as gm
 from graphics.cell_button import CellButton
+from web.connect_service import ConnectionService
 
 
 class GameWindow(qtw.QWidget):
 
     def __init__(self, game_params: gm.GameParams,
-                 main_window: qtw.QMainWindow):
+                 main_window: qtw.QMainWindow,
+                 connection_service: ConnectionService = None):
         super().__init__()
         self._main_win = main_window
         self._win_close = False
