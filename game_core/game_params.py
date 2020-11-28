@@ -10,3 +10,8 @@ class GameParams:
     field_params: FieldParams
     is_time_mode: bool
     main_player: str = 'white'
+
+    def __str__(self):
+        return f'{self.game_mode},{self.field_params.column_count},' \
+               f'{self.is_time_mode},' \
+               f'{"white" if self.main_player == "black" else "black"}'
