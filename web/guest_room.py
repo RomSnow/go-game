@@ -1,10 +1,12 @@
 import socket
 
+from web.connect_service import ConnectionService
 from web.web_exceptions import WrongConnection
 
 
-class GuestRoom:
+class GuestRoom(ConnectionService):
     def __init__(self, ip_code):
+        super().__init__()
         self._host_ip = self._decode(ip_code)
 
     def set_connection(self):

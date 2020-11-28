@@ -1,9 +1,12 @@
 import socket
-# import web.web_exceptions as web_exc
+
+import web.web_exceptions as web_exc
+from web.connect_service import ConnectionService
 
 
-class HostRoom:
+class HostRoom(ConnectionService):
     def __init__(self):
+        super().__init__()
         self._ip = self._get_my_ip()
         self._socket = self._init_socket()
 
@@ -14,8 +17,7 @@ class HostRoom:
         try:
             sock.bind((self._ip, port))
         except OSError:
-            pass
-            # raise web_exc.WrongConnection
+            raise web_exc.WrongConnection
 
         return sock
 
@@ -45,9 +47,6 @@ class HostRoom:
             code_str += str(count) + chr(65 + off)
 
         return code_str
-
-    def close(self):
-        self._socket.close()
 
 
 if __name__ == '__main__':
