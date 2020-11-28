@@ -1,0 +1,2 @@
+class WrongConnection(OSError):
+    pass
