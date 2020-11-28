@@ -1,3 +1,4 @@
+import os
 import sys
 
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -117,7 +118,8 @@ class MainWindow(QtWidgets.QMainWindow):
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred,
                                            QtWidgets.QSizePolicy.Preferred)
         self.white_button.setSizePolicy(sizePolicy)
-        self.white_button.setIcon(QIcon('white.png'))
+        self.white_button.setIcon(QIcon(
+            f'{os.path.dirname(__file__)}/white.png'))
         self.white_button.setIconSize(QtCore.QSize(80, 80))
         self.choose_color_layout.addWidget(self.white_button)
         self._choose_color_buttons.append(self.white_button)
@@ -131,7 +133,8 @@ class MainWindow(QtWidgets.QMainWindow):
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Maximum,
                                            QtWidgets.QSizePolicy.Preferred)
         self.black_button.setSizePolicy(sizePolicy)
-        self.black_button.setIcon(QIcon('black.png'))
+        self.black_button.setIcon(QIcon(
+            f'{os.path.dirname(__file__)}/black.png'))
         self.black_button.setIconSize(QtCore.QSize(80, 80))
         self.choose_color_layout.addWidget(self.black_button)
         self._choose_color_buttons.append(self.black_button)
