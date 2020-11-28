@@ -22,7 +22,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.show()
 
     def setupUi(self, MainWindow):
-        MainWindow.setFixedSize(480, 640)
+        MainWindow.setFixedSize(
+            QtWidgets.QApplication.desktop().width() * 0.25,
+            QtWidgets.QApplication.desktop().height() * 0.6)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.verticalLayoutWidget = QtWidgets.QWidget(self.centralwidget)
         self.verticalLayoutWidget.setGeometry(10, 10, 461, 601)
