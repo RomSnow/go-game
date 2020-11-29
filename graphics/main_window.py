@@ -1,5 +1,6 @@
 import os
 import sys
+import threading as thr
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QIcon
@@ -310,11 +311,6 @@ class MainWindow(QtWidgets.QMainWindow):
     def _create_button_func(self):
         host_room = HostRoom()
         address = host_room.get_address_code()
-        try:
-            reply = AddressOutMessage(address)
-        except ExitException:
-            host_room.close()
-            return
 
         game_params = game_win.gm.GameParams(
             game_mode=self._game_mode,
@@ -323,14 +319,24 @@ class MainWindow(QtWidgets.QMainWindow):
             main_player=self._main_player,
             is_time_mode=self.time_game_check.isChecked()
         )
-
-        host_room.wait_connection(game_params)
-
+        thread = thr.Thread(target=host_room.wait_connection,
+                            args=(game_params,))
+        thread.start()
+        try:
+            w = AddressOutMessage(address)
+        except ExitException:
+            host_room.cancel()
+            return
+        thread.join()
         game_window = game_win.GameWindow(game_params, self, host_room)
         self.hide()
 
     def _record_button_func(self):
         pass
+
+
+class ExitException(Exception):
+    pass
 
 
 class AddressOutMessage(QtWidgets.QMessageBox):
@@ -341,17 +347,15 @@ class AddressOutMessage(QtWidgets.QMessageBox):
         self.setInformativeText('Ожидание подключения')
         ext_button = self.addButton('Отмена',
                                     QtWidgets.QMessageBox.RejectRole)
+        ok_button = self.addButton('ОК',
+                                   QtWidgets.QMessageBox.RejectRole)
         self.exec()
 
         if self.clickedButton() == ext_button:
             raise ExitException
 
 
-class ExitException(Exception):
-    pass
-
-
 if __name__ == '__main__':
     app = QtWidgets.QApplication([])
-    window = MainWindow()
+    window = WaitingMsg('SDFLKJ')
     sys.exit(app.exec_())
