@@ -18,23 +18,23 @@ class HostRoom(ConnectionService):
         try:
             sock.bind((self._ip, port))
         except OSError:
+            sock.close()
             raise web_exc.WrongConnection
 
         return sock
 
-    def wait_connection(self, game_params: GameParams) -> bool:
+    def wait_connection(self, game_params: GameParams = None) -> bool:
         self._socket.listen(1)
-        self._socket.accept()
-        self._socket.sendall(str(game_params).encode())
+        con, address = self._socket.accept()
+        con.sendall(str(game_params).encode())
         return True
 
     @staticmethod
     def _get_my_ip() -> str:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("google.com", 80))
-        ip = s.getsockname()[0]
-        s.close()
-        return ip
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        s.connect(('<broadcast>', 0))
+        return s.getsockname()[0]
 
     def get_address_code(self) -> str:
         address = self._ip.split('.')
@@ -47,3 +47,10 @@ class HostRoom(ConnectionService):
             code_str += str(count) + chr(65 + off)
 
         return code_str
+
+
+if __name__ == '__main__':
+    host = HostRoom()
+    print(host._get_my_ip())
+    host.wait_connection()
+    host.close()
