@@ -15,7 +15,7 @@ class GuestRoom(ConnectionService):
         sock.settimeout(3)
 
         port = 5000
-
+        print(self._host_ip)
         try:
             sock.connect((self._host_ip, port))
         except (OSError, socket.timeout):
@@ -50,11 +50,13 @@ class GuestRoom(ConnectionService):
             game_mode = gp.GameModes.ai
         else:
             game_mode = gp.GameModes.online
-            return gp.GameParams(game_mode=game_mode,
-                                 field_params=gp.FieldParams(int(data[1])),
-                                 is_time_mode=bool(data[2]),
-                                 second_on_move=int(data[4]),
-                                 main_player=data[3])
+
+        is_time_mode = True if data[2] == 'True' else False
+        return gp.GameParams(game_mode=game_mode,
+                             field_params=gp.FieldParams(int(data[1])),
+                             is_time_mode=is_time_mode,
+                             second_on_move=int(data[4]),
+                             main_player=data[3])
 
 
 if __name__ == '__main__':

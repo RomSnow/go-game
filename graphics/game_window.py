@@ -25,6 +25,7 @@ class GameWindow(qtw.QWidget):
         self._game = gm.create_game(game_params, connection_service)
         self._field_buttons = list()
         self.threads = list()
+        self.clock = None
         self.is_waiting_complete = False
         self.exit_flag = False
         self._set_ui(self._game.field_size)
