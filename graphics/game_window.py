@@ -94,9 +94,9 @@ class GameWindow(qtw.QWidget):
                     elif ans == 2:
                         self.show_error()
 
-            self.threads = list()
-            self.is_waiting_complete = False
-            self.timer.stop()
+                    self.threads = list()
+                    self.is_waiting_complete = False
+                    self.timer.stop()
 
     def online_close(self):
         pass
