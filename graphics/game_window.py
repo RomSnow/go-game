@@ -1,7 +1,5 @@
-import sys
 from queue import Queue
 from threading import Thread
-from typing import List
 
 from PyQt5 import QtWidgets as qtw
 from PyQt5.QtCore import QTimer
@@ -9,6 +7,7 @@ from PyQt5.QtWidgets import QMessageBox
 
 from game_core import game_manager as gm
 from graphics.cell_button import CellButton
+from graphics.clock import Clock
 from web.connect_service import ConnectionService
 from web.guest_room import GuestRoom
 
@@ -40,10 +39,16 @@ class GameWindow(qtw.QWidget):
         main_grid.setSizeConstraint(qtw.QLayout.SetFixedSize)
         self._set_field(field_size, main_grid)
         self._set_menu(main_grid)
+
+        if self._game_params.is_time_mode:
+            self.clock = Clock(self._game_params.second_on_move,
+                               self._game, self)
+            main_grid.addWidget(self.clock.get_label(), 0, 0)
+
         self.setLayout(main_grid)
 
-        self.timer = QTimer()
-        self.timer.timeout.connect(self._timeout)
+        self.threads_timer = QTimer()
+        self.threads_timer.timeout.connect(self._timeout)
 
     def _set_field(self, field_size: int, main_grid: qtw.QGridLayout):
         field_grid = qtw.QGridLayout()
@@ -57,7 +62,7 @@ class GameWindow(qtw.QWidget):
                     button, i, j
                 )
 
-        main_grid.addLayout(field_grid, 0, 0)
+        main_grid.addLayout(field_grid, 1, 0)
 
     def _set_menu(self, main_grid: qtw.QGridLayout):
         self._move_line = qtw.QLabel(f'Ход игрока: {self._game.current_player}')
@@ -76,7 +81,7 @@ class GameWindow(qtw.QWidget):
         menu_grid.addLayout(button_grid, 0, 1)
         menu_grid.setColumnMinimumWidth(0, 200)
 
-        main_grid.addLayout(menu_grid, 1, 0)
+        main_grid.addLayout(menu_grid, 2, 0)
 
     def _pass_move(self):
         self._game.make_move('pass')
@@ -111,11 +116,17 @@ class GameWindow(qtw.QWidget):
 
                     self.threads = list()
                     self.is_waiting_complete = False
-                    self.timer.stop()
+                    self.threads_timer.stop()
+
+                    if self.clock:
+                        self.clock.restart()
 
     def update(self):
         for button in self._field_buttons:
             button.redraw()
+
+        if self.clock:
+            self.clock.restart()
 
         self._move_line.setText(f'Ход игрока: {self._game.current_player}')
 
@@ -130,7 +141,7 @@ class GameWindow(qtw.QWidget):
                         args=(queue, self.exit_flag))
         self.threads.append((thread, queue))
         thread.start()
-        self.timer.start(500)
+        self.threads_timer.start(500)
 
     def _restart_game(self):
         result = self._game.get_result()
@@ -139,11 +150,15 @@ class GameWindow(qtw.QWidget):
         win_string = f'Победитель: {result["Победитель"]} игрок'
         result_str = f'{white_str}\n{black_str}\n{win_string}\nНачать заново?'
 
+        buttons = (qtw.QMessageBox.Yes | qtw.QMessageBox.No, qtw.QMessageBox.No)
+
+        if self._game.is_online_mode:
+            buttons = (qtw.QMessageBox.Ok,)
+
         reply = qtw.QMessageBox.question(self, 'Restart',
                                          result_str,
-                                         qtw.QMessageBox.Yes |
-                                         qtw.QMessageBox.No,
-                                         qtw.QMessageBox.No)
+                                         *buttons
+                                         )
 
         if reply == qtw.QMessageBox.Yes:
             self._game = gm.create_game(self._game_params)

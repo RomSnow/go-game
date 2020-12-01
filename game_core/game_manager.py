@@ -96,6 +96,7 @@ class Game:
             move == move - ставит фишку игрока на позицию x, y;
             move == pass - пассующий ход
         """
+
         if move == 'move':
             self._field.set_stone_on_position(self.current_player,
                                               x - 1, y - 1)
@@ -109,6 +110,8 @@ class Game:
                 self._game_is_on = False
                 return
             self._is_pass = True
+        elif move == 'lim':
+            pass
 
         else:
             raise exc.IncorrectMove
@@ -120,6 +123,14 @@ class Game:
 
     def make_ai_move(self):
         self._ai.make_move(self)
+
+    def time_limit(self):
+        self._switch_player()
+        if self.is_online_mode:
+            self._connect_service.send_move('lim 0 0')
+
+        elif self._is_ai_mode:
+            self.make_ai_move()
 
     def print_field(self):
         print(self._field)

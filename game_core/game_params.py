@@ -9,6 +9,7 @@ class GameParams:
     game_mode: GameModes
     field_params: FieldParams
     is_time_mode: bool
+    second_on_move: int = 5
     main_player: str = 'white'
 
     def __str__(self):

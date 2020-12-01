@@ -9,7 +9,7 @@ class GameManagerTests(unittest.TestCase):
 
     def test_make_move(self):
         game = gm.Game(gm.field.FieldParams(9),
-                       self.white_player, self.black_player)
+                       self.white_player, self.black_player, 'white')
         first_player = game.current_player
         game.make_move('pass', 0, 0)
         self.assertNotEqual(game.current_player, first_player)
@@ -22,7 +22,7 @@ class GameManagerTests(unittest.TestCase):
 
     def test_end_game(self):
         game = gm.Game(gm.field.FieldParams(9),
-                       self.white_player, self.black_player)
+                       self.white_player, self.black_player, 'white')
         game.make_move('pass')
         game.make_move('pass')
         self.assertFalse(game.game_is_on)
@@ -32,7 +32,7 @@ class GameManagerTests(unittest.TestCase):
 
     def test_point_counter(self):
         game = gm.Game(gm.field.FieldParams(9),
-                       self.white_player, self.black_player)
+                       self.white_player, self.black_player, 'white')
         for i in range(1, 10):
             game.make_move('move', 2, i)
             game.make_move('move', 8, i)
