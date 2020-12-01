@@ -59,13 +59,7 @@ class CellButton(QPushButton):
         except gm.exc.WaitingException:
             return
 
-        queue = Queue()
-        thread = Thread(target=self._game.wait_online_move,
-                        args=(queue,))
-        self._game_window.threads.append((thread, queue))
-        print('thread start')
-        thread.start()
-        self._game_window.timer.start(500)
+        self._game_window.wait_move()
 
     def redraw(self):
         stone = self._game.get_stone_on_position(self._x, self._y)

@@ -21,7 +21,7 @@ class GameWindow(qtw.QWidget):
         self._main_win = main_window
         self._win_close = False
         self._game_params = game_params
-        self._game = gm.create_game(game_params)
+        self._game = gm.create_game(game_params, connection_service)
         self._field_buttons = list()
         self.threads = list()
         self.is_waiting_complete = False
@@ -122,6 +122,7 @@ class GameWindow(qtw.QWidget):
         thread = Thread(target=self._game.wait_online_move,
                         args=(queue, self.is_waiting_complete))
         self.threads.append((thread, queue))
+        print('thread start')
         thread.start()
         self.timer.start(500)
 

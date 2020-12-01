@@ -23,6 +23,9 @@ class ConnectionService:
         while True:
             try:
                 in_str = self._connection.recv(2048)
+                if not in_str:
+                    time.sleep(2)
+                    continue
                 break
             except socket.timeout:
                 if not self._waiting:
