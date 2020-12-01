@@ -160,5 +160,6 @@ class GameWindow(qtw.QWidget):
         self._main_win.show()
 
         if self._game.is_online_mode:
+            self._connection_service.send_move('exit')
             self.exit_flag = True
             self._connection_service.close()
