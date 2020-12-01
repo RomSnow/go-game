@@ -1,5 +1,6 @@
 """Модуль для управления игровым процессом"""
 from itertools import cycle
+from queue import Queue
 
 import game_core.field as field
 import game_core.player as player
@@ -9,6 +10,7 @@ import game_core.ai_enemy as ai
 from game_core.game_modes import GameModes
 from game_core.game_params import GameParams
 from web.connect_service import ConnectionService
+from web.web_exceptions import WrongConnection
 
 
 class Game:
@@ -28,6 +30,8 @@ class Game:
         self._is_ai_mode = False
         self._current_player = next(self._players)
         self._is_pass = False
+        self._connect_service = connect_service
+        self._wait_online_move = False
 
         if is_ai_mode:
             if main_player == 'white':
@@ -62,6 +66,24 @@ class Game:
         return self._field.get_obj_on_position(x - 1, y - 1)
 
     def make_move(self, move: str, x=-1, y=-1, is_ai_move=False):
+        if self._wait_online_move:
+            raise exc.WaitingException
+        self._make_move(move, x, y, is_ai_move)
+        if self._connect_service:
+            self._connect_service.send_move(move, field.Point(x, y))
+
+    def wait_online_move(self, queue: Queue, flag: bool):
+        self._wait_online_move = True
+        answer = self._connect_service.wait_move()
+        if not answer or answer == 'exit':
+            self._wait_online_move = False
+            raise ExitException
+        data = answer.split()
+        self._make_move(data[0], int(data[1]), int(data[2]))
+        self._wait_online_move = False
+        flag = True
+
+    def _make_move(self, move: str, x=-1, y=-1, is_ai_move=False):
         """Проделывает ход, соответсвующий параметру move
 
             move == move - ставит фишку игрока на позицию x, y;
@@ -188,3 +210,7 @@ def create_game(game_params: GameParams,
     return Game(game_params.field_params,
                 white_player, black_player, game_params.main_player,
                 is_ai_mode, connection_service)
+
+
+class ExitException(Exception):
+    pass

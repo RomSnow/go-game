@@ -7,17 +7,30 @@ from web.web_exceptions import WrongConnection
 
 class ConnectionService:
     def __init__(self):
-        self._socket = socket.socket()
+        self._connection = None
+        self._socket = None
+        self._waiting = False
 
     def send_move(self, move: str, point: Point = Point(0, 0)):
         if move == 'pass':
-            send_str = 'pass'
+            send_str = 'pass -1 -1'
         else:
             send_str = f'{move} {point.x} {point.y}'
         self._try_to_send(send_str.encode())
 
     def wait_move(self) -> str:
-        in_str = self._socket.recv(2048)
+        self._waiting = True
+        while True:
+            try:
+                in_str = self._connection.recv(2048)
+                break
+            except socket.timeout:
+                if not self._waiting:
+                    self._waiting = False
+                    return ''
+            except OSError:
+                raise WrongConnection
+
         if not in_str:
             raise WrongConnection
         return in_str.decode()
@@ -32,7 +45,7 @@ class ConnectionService:
         try_count = 0
         while True:
             try:
-                self._socket.sendall(msg)
+                self._connection.sendall(msg)
                 break
             except OSError:
                 if try_count > 5:

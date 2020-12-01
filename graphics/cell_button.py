@@ -1,4 +1,5 @@
 import os
+from threading import Thread
 
 from PyQt5.QtCore import QSize
 from PyQt5.QtGui import QIcon
@@ -54,6 +55,13 @@ class CellButton(QPushButton):
             pass
         except gm.exc.IncorrectMove:
             pass
+        except gm.exc.WaitingException:
+            return
+
+        thread = Thread(target=self._game.wait_online_move(
+            self._game_window.threads, self._game_window.is_waiting_complete))
+        thread.start()
+        self._game_window.timer.start(500)
 
     def redraw(self):
         stone = self._game.get_stone_on_position(self._x, self._y)

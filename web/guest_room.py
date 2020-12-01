@@ -12,22 +12,22 @@ class GuestRoom(ConnectionService):
 
     def set_connection(self) -> gp.GameParams:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(3)
 
         port = 5000
-        while True:
-            try:
-                sock.connect((self._host_ip, port))
-                break
-            except OSError as e:
-                raise WrongConnection
+
+        try:
+            sock.connect((self._host_ip, port))
+        except (OSError, socket.timeout):
+            raise WrongConnection
 
         self._socket = sock
-
-        params_str = self._socket.recv(2048)
+        self._connection = sock
+        params_str = self._connection.recv(2048)
         return self._create_params(params_str.decode())
 
     def close(self):
-        self._socket.close()
+        self._connection.close()
 
     @staticmethod
     def _decode(ip_code) -> str:

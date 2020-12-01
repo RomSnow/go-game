@@ -1,6 +1,9 @@
 import sys
+from queue import Queue
+from threading import Thread
 
 from PyQt5 import QtWidgets as qtw
+from PyQt5.QtCore import QTimer
 
 from game_core import game_manager as gm
 from graphics.cell_button import CellButton
@@ -18,6 +21,8 @@ class GameWindow(qtw.QWidget):
         self._game_params = game_params
         self._game = gm.create_game(game_params)
         self._field_buttons = list()
+        self.threads = list()
+        self.is_waiting_complete = False
         self._set_ui(self._game.field_size)
         self.update()
         self.show()
@@ -28,6 +33,9 @@ class GameWindow(qtw.QWidget):
         self._set_field(field_size, main_grid)
         self._set_menu(main_grid)
         self.setLayout(main_grid)
+
+        self.timer = QTimer()
+        self.timer.timeout.connect(self._timeout)
 
     def _set_field(self, field_size: int, main_grid: qtw.QGridLayout):
         field_grid = qtw.QGridLayout()
@@ -65,6 +73,33 @@ class GameWindow(qtw.QWidget):
     def _pass_move(self):
         self._game.make_move('pass')
         self.update()
+        queue = Queue()
+        thread = Thread(target=self._game.wait_online_move,
+                        args=(queue, self.is_waiting_complete))
+        self.threads.append((thread, queue))
+        thread.start()
+        self.timer.start(500)
+
+    def _timeout(self):
+        if self.threads:
+            for thread in self.threads:
+                if self.is_waiting_complete:
+                    thread[0].join()
+                    ans = thread[1].get()
+
+                    if ans == 0:
+                        self.update()
+                    elif ans == 1:
+                        self.online_close()
+                    elif ans == 2:
+                        self.show_error()
+
+            self.threads = list()
+            self.is_waiting_complete = False
+            self.timer.stop()
+
+    def online_close(self):
+        pass
 
     def update(self):
         for button in self._field_buttons:
@@ -89,7 +124,7 @@ class GameWindow(qtw.QWidget):
                                          qtw.QMessageBox.Yes |
                                          qtw.QMessageBox.No,
                                          qtw.QMessageBox.No)
-        #
+
         if reply == qtw.QMessageBox.Yes:
             self._game = gm.create_game(self._game_params)
             for button in self._field_buttons:

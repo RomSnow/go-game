@@ -324,7 +324,7 @@ class MainWindow(QtWidgets.QMainWindow):
         thread.start()
         try:
             w = AddressOutMessage(address)
-        except ExitException:
+        except game_win.gm.ExitException:
             host_room.cancel()
             return
         thread.join()
@@ -333,10 +333,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def _record_button_func(self):
         pass
-
-
-class ExitException(Exception):
-    pass
 
 
 class AddressOutMessage(QtWidgets.QMessageBox):
@@ -352,7 +348,7 @@ class AddressOutMessage(QtWidgets.QMessageBox):
         self.exec()
 
         if self.clickedButton() == ext_button:
-            raise ExitException
+            raise game_win.gm.ExitException()
 
 
 if __name__ == '__main__':

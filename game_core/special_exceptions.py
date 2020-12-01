@@ -15,3 +15,7 @@ class BusyPoint(IncorrectMove):
 
 class KOException(IncorrectMove):
     """Нарушение правила Ко"""
+
+
+class WaitingException(OSError):
+    pass

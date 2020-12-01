@@ -11,7 +11,6 @@ class HostRoom(ConnectionService):
         super().__init__()
         self._ip = self._get_my_ip()
         self._socket = self._init_socket()
-        self._waiting = True
         self._connection = None
 
     def _init_socket(self) -> socket.socket:
@@ -20,8 +19,8 @@ class HostRoom(ConnectionService):
         return sock
 
     def wait_connection(self, game_params: GameParams = None) -> bool:
-        print('waiting...')
         self._socket.listen(1)
+        self._waiting = True
         while True:
             try:
                 con, address = self._socket.accept()
