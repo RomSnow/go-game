@@ -18,9 +18,11 @@ class ConnectionService:
             send_str = f'{move} {point.x} {point.y}'
         self._try_to_send(send_str.encode())
 
-    def wait_move(self) -> str:
+    def wait_move(self, exit_flag: bool) -> str:
         self._waiting = True
         while True:
+            if exit_flag:
+                raise SystemExit
             try:
                 in_str = self._connection.recv(2048)
                 if not in_str:

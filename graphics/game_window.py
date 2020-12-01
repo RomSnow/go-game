@@ -5,6 +5,7 @@ from typing import List
 
 from PyQt5 import QtWidgets as qtw
 from PyQt5.QtCore import QTimer
+from PyQt5.QtWidgets import QMessageBox
 
 from game_core import game_manager as gm
 from graphics.cell_button import CellButton
@@ -19,12 +20,14 @@ class GameWindow(qtw.QWidget):
                  connection_service: ConnectionService = None):
         super().__init__()
         self._main_win = main_window
+        self._connection_service = connection_service
         self._win_close = False
         self._game_params = game_params
         self._game = gm.create_game(game_params, connection_service)
         self._field_buttons = list()
         self.threads = list()
         self.is_waiting_complete = False
+        self.exit_flag = False
         self._set_ui(self._game.field_size)
         self.update()
 
@@ -78,7 +81,8 @@ class GameWindow(qtw.QWidget):
     def _pass_move(self):
         self._game.make_move('pass')
         self.update()
-        self.wait_move()
+        if self._game.is_online_mode:
+            self.wait_move()
 
     def _timeout(self):
         if self.threads:
@@ -90,16 +94,25 @@ class GameWindow(qtw.QWidget):
                     if ans == 0:
                         self.update()
                     elif ans == 1:
-                        self.online_close()
+                        self.msg = QMessageBox().question(
+                            self,
+                            'Уведомление',
+                            'Противник вышел!',
+                            QMessageBox.Ok
+                        )
+                        self.close()
                     elif ans == 2:
-                        self.show_error()
+                        self.msg = QMessageBox().question(
+                            self,
+                            'Уведомление',
+                            'Ошибка сети!',
+                            QMessageBox.Ok
+                        )
+                        self.close()
 
                     self.threads = list()
                     self.is_waiting_complete = False
                     self.timer.stop()
-
-    def online_close(self):
-        pass
 
     def update(self):
         for button in self._field_buttons:
@@ -115,7 +128,7 @@ class GameWindow(qtw.QWidget):
     def wait_move(self):
         queue = Queue()
         thread = Thread(target=self._game.wait_online_move,
-                        args=(queue,))
+                        args=(queue, self.exit_flag))
         self.threads.append((thread, queue))
         print('thread start')
         thread.start()
@@ -145,3 +158,7 @@ class GameWindow(qtw.QWidget):
 
     def closeEvent(self, a0) -> None:
         self._main_win.show()
+
+        if self._game.is_online_mode:
+            self.exit_flag = True
+            self._connection_service.close()

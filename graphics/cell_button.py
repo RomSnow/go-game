@@ -4,7 +4,7 @@ from threading import Thread
 
 from PyQt5.QtCore import QSize
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QPushButton
+from PyQt5.QtWidgets import QPushButton, QMessageBox
 
 from game_core import game_manager as gm
 
@@ -49,17 +49,38 @@ class CellButton(QPushButton):
             self._game.make_move('move', self._x, self._y)
             self._game_window.update()
         except gm.exc.BusyPoint:
-            pass
+            self._game_window.msg = \
+                QMessageBox.question(self._game_window,
+                                     'Неверный ход',
+                                     'Точка занята!',
+                                     QMessageBox.Ok)
+            return
         except gm.exc.SuicideMove:
-            pass
+            self._game_window.msg = \
+                QMessageBox.question(self._game_window,
+                                     'Неверный ход',
+                                     'Самоубийственный ход!',
+                                     QMessageBox.Ok)
+            return
         except gm.exc.KOException:
-            pass
+            self._game_window.msg = \
+                QMessageBox.question(self._game_window,
+                                     'Неверный ход',
+                                     'Точка занята!',
+                                     QMessageBox.Ok)
+            return
         except gm.exc.IncorrectMove:
-            pass
+            self._game_window.msg = \
+                QMessageBox.question(self._game_window,
+                                     'Неверный ход',
+                                     'Точка занята!',
+                                     QMessageBox.Ok)
+            return
         except gm.exc.WaitingException:
             return
 
-        self._game_window.wait_move()
+        if self._game.is_online_mode:
+            self._game_window.wait_move()
 
     def redraw(self):
         stone = self._game.get_stone_on_position(self._x, self._y)

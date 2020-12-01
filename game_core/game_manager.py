@@ -28,6 +28,7 @@ class Game:
         self._players = cycle([white_player, black_player])
         self._game_is_on = True
         self._is_ai_mode = False
+        self.is_online_mode = bool(connect_service)
         self._current_player = next(self._players)
         self._is_pass = False
         self._connect_service = connect_service
@@ -72,9 +73,9 @@ class Game:
         if self._connect_service:
             self._connect_service.send_move(move, field.Point(x, y))
 
-    def wait_online_move(self, queue: Queue):
+    def wait_online_move(self, queue: Queue, exit_flag: bool):
         self._wait_online_move = True
-        answer = self._connect_service.wait_move()
+        answer = self._connect_service.wait_move(exit_flag)
         if not answer or answer == 'exit':
             self._wait_online_move = False
             queue.put(1)
