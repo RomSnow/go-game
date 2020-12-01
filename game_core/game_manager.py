@@ -76,11 +76,11 @@ class Game:
     def wait_online_move(self, queue: Queue, exit_flag: bool):
         self._wait_online_move = True
         answer = self._connect_service.wait_move(exit_flag)
-        if not answer or answer == 'exit':
+        data = answer.split()
+        if not data or data[0] == 'exit':
             self._wait_online_move = False
             queue.put(1)
             return
-        data = answer.split()
         self._make_move(data[0], int(data[1]), int(data[2]))
         self._wait_online_move = False
         queue.put(0)

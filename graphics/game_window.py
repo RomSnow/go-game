@@ -90,7 +90,6 @@ class GameWindow(qtw.QWidget):
                 if thread[1].qsize():
                     thread[0].join()
                     ans = thread[1].get()
-                    print('thread_stop')
                     if ans == 0:
                         self.update()
                     elif ans == 1:
@@ -130,7 +129,6 @@ class GameWindow(qtw.QWidget):
         thread = Thread(target=self._game.wait_online_move,
                         args=(queue, self.exit_flag))
         self.threads.append((thread, queue))
-        print('thread start')
         thread.start()
         self.timer.start(500)
 
