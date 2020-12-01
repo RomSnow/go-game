@@ -15,4 +15,5 @@ class GameParams:
     def __str__(self):
         return f'{self.game_mode},{self.field_params.column_count},' \
                f'{self.is_time_mode},' \
-               f'{"white" if self.main_player == "black" else "black"}'
+               f'{"white" if self.main_player == "black" else "black"},' \
+               f'{self.second_on_move}'

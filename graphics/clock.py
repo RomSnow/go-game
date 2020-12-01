@@ -22,7 +22,7 @@ class Clock:
         self._current_time -= 1
         self._text_label.setText('Время хода: ' + str(self._current_time))
 
-        if self._current_time == 0:
+        if self._current_time <= 0:
             self._interception()
 
     def _interception(self):
