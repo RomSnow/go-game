@@ -78,12 +78,7 @@ class GameWindow(qtw.QWidget):
     def _pass_move(self):
         self._game.make_move('pass')
         self.update()
-        queue = Queue()
-        thread = Thread(target=self._game.wait_online_move,
-                        args=(queue, self.is_waiting_complete))
-        self.threads.append((thread, queue))
-        thread.start()
-        self.timer.start(500)
+        self.wait_move()
 
     def _timeout(self):
         if self.threads:
@@ -120,7 +115,7 @@ class GameWindow(qtw.QWidget):
     def wait_move(self):
         queue = Queue()
         thread = Thread(target=self._game.wait_online_move,
-                        args=(queue, self.is_waiting_complete))
+                        args=(queue,))
         self.threads.append((thread, queue))
         print('thread start')
         thread.start()
