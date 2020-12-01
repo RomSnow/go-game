@@ -75,7 +75,12 @@ class Game:
 
     def wait_online_move(self, queue: Queue, exit_flag: bool):
         self._wait_online_move = True
-        answer = self._connect_service.wait_move(exit_flag)
+        try:
+            answer = self._connect_service.wait_move(exit_flag)
+        except WrongConnection:
+            self._wait_online_move = False
+            queue.put(2)
+            return
         data = answer.split()
         if not data or data[0] == 'exit':
             self._wait_online_move = False
