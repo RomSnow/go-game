@@ -72,16 +72,17 @@ class Game:
         if self._connect_service:
             self._connect_service.send_move(move, field.Point(x, y))
 
-    def wait_online_move(self, queue: Queue, flag: bool):
+    def wait_online_move(self, queue: Queue):
         self._wait_online_move = True
         answer = self._connect_service.wait_move()
         if not answer or answer == 'exit':
             self._wait_online_move = False
-            raise ExitException
+            queue.put(1)
+            return
         data = answer.split()
         self._make_move(data[0], int(data[1]), int(data[2]))
         self._wait_online_move = False
-        flag = True
+        queue.put(0)
 
     def _make_move(self, move: str, x=-1, y=-1, is_ai_move=False):
         """Проделывает ход, соответсвующий параметру move

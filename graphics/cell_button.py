@@ -1,4 +1,5 @@
 import os
+from queue import Queue
 from threading import Thread
 
 from PyQt5.QtCore import QSize
@@ -58,8 +59,11 @@ class CellButton(QPushButton):
         except gm.exc.WaitingException:
             return
 
-        thread = Thread(target=self._game.wait_online_move(
-            self._game_window.threads, self._game_window.is_waiting_complete))
+        queue = Queue()
+        thread = Thread(target=self._game.wait_online_move,
+                        args=(queue,))
+        self._game_window.threads.append((thread, queue))
+        print('thread start')
         thread.start()
         self._game_window.timer.start(500)
 

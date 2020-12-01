@@ -1,6 +1,7 @@
 import sys
 from queue import Queue
 from threading import Thread
+from typing import List
 
 from PyQt5 import QtWidgets as qtw
 from PyQt5.QtCore import QTimer
@@ -8,6 +9,7 @@ from PyQt5.QtCore import QTimer
 from game_core import game_manager as gm
 from graphics.cell_button import CellButton
 from web.connect_service import ConnectionService
+from web.guest_room import GuestRoom
 
 
 class GameWindow(qtw.QWidget):
@@ -25,6 +27,9 @@ class GameWindow(qtw.QWidget):
         self.is_waiting_complete = False
         self._set_ui(self._game.field_size)
         self.update()
+
+        if isinstance(connection_service, GuestRoom):
+            self.wait_move()
         self.show()
 
     def _set_ui(self, field_size):
@@ -83,10 +88,10 @@ class GameWindow(qtw.QWidget):
     def _timeout(self):
         if self.threads:
             for thread in self.threads:
-                if self.is_waiting_complete:
+                if thread[1].qsize():
                     thread[0].join()
                     ans = thread[1].get()
-
+                    print('thread_stop')
                     if ans == 0:
                         self.update()
                     elif ans == 1:
@@ -111,6 +116,14 @@ class GameWindow(qtw.QWidget):
             self._restart_game()
             if not self._win_close:
                 self.update()
+
+    def wait_move(self):
+        queue = Queue()
+        thread = Thread(target=self._game.wait_online_move,
+                        args=(queue, self.is_waiting_complete))
+        self.threads.append((thread, queue))
+        thread.start()
+        self.timer.start(500)
 
     def _restart_game(self):
         result = self._game.get_result()
