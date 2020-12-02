@@ -75,10 +75,15 @@ class Game:
         print('start waiting')
         try:
             answer = self._connect_service.wait_move(exit_flag)
+        except SystemExit:
+            exit_flag.is_up = False
+            queue.put(0)
+            return
         except WrongConnection:
             queue.put(2)
             exit_flag.is_up = False
             return
+
         data = answer.split()
         if not data or data[0] == 'exit':
             queue.put(1)
