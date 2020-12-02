@@ -10,6 +10,7 @@ import game_core.ai_enemy as ai
 from game_core.game_modes import GameModes
 from game_core.game_params import GameParams
 from web.connect_service import ConnectionService
+from web.flag import Flag
 from web.web_exceptions import WrongConnection
 
 
@@ -70,23 +71,23 @@ class Game:
         if self._connect_service:
             self._connect_service.send_move(move, field.Point(x, y))
 
-    def wait_online_move(self, queue: Queue, exit_flag: bool):
+    def wait_online_move(self, queue: Queue, exit_flag: Flag):
         print('start waiting')
         try:
             answer = self._connect_service.wait_move(exit_flag)
         except WrongConnection:
             queue.put(2)
-            exit_flag = False
+            exit_flag.is_up = False
             return
         data = answer.split()
         if not data or data[0] == 'exit':
             queue.put(1)
             print('exit')
-            exit_flag = False
+            exit_flag.is_up = False
             return
         self._make_move(data[0], int(data[1]), int(data[2]))
         queue.put(0)
-        exit_flag = False
+        exit_flag.is_up = False
         print('stop waiting')
 
     def _make_move(self, move: str, x=-1, y=-1, is_ai_move=False):
@@ -125,7 +126,7 @@ class Game:
         self._switch_player()
         if self.is_online_mode:
             if game_window.is_waiting:
-                game_window.is_waiting = False
+                game_window.is_waiting.is_up = False
             else:
                 game_window.wait_move()
 

@@ -10,6 +10,7 @@ from game_core import game_manager as gm
 from graphics.cell_button import CellButton
 from graphics.clock import Clock
 from web.connect_service import ConnectionService
+from web.flag import Flag
 from web.guest_room import GuestRoom
 from web.web_exceptions import WrongConnection
 
@@ -28,7 +29,7 @@ class GameWindow(qtw.QWidget):
         self._field_buttons = list()
         self.threads = list()
         self.clock = None
-        self.is_waiting = False
+        self.is_waiting = Flag()
         self.exit_flag = False
         self._set_ui(self._game.field_size)
         self.update()
@@ -105,7 +106,7 @@ class GameWindow(qtw.QWidget):
         queue = Queue()
         thread = Thread(target=self._connection_service.wait_confirm,
                         args=(queue, self.is_waiting))
-        self.is_waiting = True
+        self.is_waiting.is_up = True
         thread.start()
         self.threads.append((thread, queue))
         self.threads_timer.start(500)
@@ -137,6 +138,7 @@ class GameWindow(qtw.QWidget):
                     elif ans == 'ok':
                         if self.clock:
                             self.clock.start()
+                        self.is_waiting.is_up = False
                         if isinstance(self._connection_service, GuestRoom):
                             self.wait_move()
                         self._move_line.setText(
@@ -167,7 +169,7 @@ class GameWindow(qtw.QWidget):
         thread = Thread(target=self._game.wait_online_move,
                         args=(queue, self.is_waiting))
         self.threads.append((thread, queue))
-        self.is_waiting = True
+        self.is_waiting.is_up = True
         thread.start()
         self.threads_timer.start(500)
 
@@ -202,7 +204,7 @@ class GameWindow(qtw.QWidget):
 
         if self._game.is_online_mode:
             self._connection_service.send_move('exit')
-            self.is_waiting = False
+            self.is_waiting.is_up = False
             time.sleep(0.5)
             self._timeout()
             self._connection_service.close()
