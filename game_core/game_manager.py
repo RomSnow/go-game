@@ -127,7 +127,7 @@ class Game:
     def time_limit(self):
         self._switch_player()
         if self.is_online_mode:
-            self._connect_service.send_move('lim 0 0')
+            self._connect_service.send_move('lim')
 
         elif self._is_ai_mode:
             self.make_ai_move()

@@ -197,3 +197,6 @@ class GameWindow(qtw.QWidget):
             self._connection_service.send_move('exit')
             self.exit_flag = True
             self._connection_service.close()
+
+        if self.clock:
+            self.clock.stop()

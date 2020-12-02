@@ -2,6 +2,7 @@ from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QLabel, QMessageBox, QSizePolicy
 
 from game_core.game_manager import Game
+from web.web_exceptions import WrongConnection
 
 
 class Clock:
@@ -25,7 +26,10 @@ class Clock:
             self._interception()
 
     def _interception(self):
-        self._game.time_limit()
+        try:
+            self._game.time_limit()
+        except WrongConnection:
+            self._timer.stop()
         self._text_label.setText('Время вышло!')
         self._window.update()
 
@@ -39,3 +43,6 @@ class Clock:
 
     def start(self):
         self._timer.start(1000)
+
+    def stop(self):
+        self._timer.stop()
