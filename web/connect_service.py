@@ -1,5 +1,6 @@
 import socket
 import time
+from queue import Queue
 
 from game_core.field import Point
 from web.web_exceptions import WrongConnection
@@ -21,7 +22,7 @@ class ConnectionService:
     def send_confirm(self):
         self._try_to_send(b'ok')
 
-    def wait_confirm(self):
+    def wait_confirm(self, queue: Queue):
         while True:
             try:
                 ans = self._connection.recv(2048)
@@ -32,7 +33,9 @@ class ConnectionService:
                 pass
 
         if ans.decode() != 'ok':
-            raise WrongConnection
+            queue.put(1)
+            return
+        queue.put(0)
 
     def wait_move(self, exit_flag: bool) -> str:
         self._waiting = True

@@ -101,14 +101,17 @@ class GameWindow(qtw.QWidget):
             return
         window = WaitWindow()
 
-        try:
-            self._connection_service.wait_confirm()
-        except WrongConnection:
+        queue = Queue()
+        thread = Thread(target=self._connection_service.wait_confirm,
+                        args=(queue,))
+        thread.start()
+        thread.join()
+
+        if queue.get():
             msh = QMessageBox.question(self, 'Ошибка', 'Ошибка сети!',
                                        QMessageBox.Ok)
-            self.close()
-
         window.close()
+        self.close()
 
     def _timeout(self):
         if self.threads:
