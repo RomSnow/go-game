@@ -183,6 +183,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.time_game_check.setFont(font)
         self.ext_layout.addWidget(self.time_game_check, 0, 1, 1, 1)
         self.verticalLayout.addLayout(self.ext_layout)
+        # time_on_move_spin
+        self.time_on_move = QtWidgets.QSpinBox(self.verticalLayoutWidget)
+        font = QtGui.QFont()
+        font.setFamily("Sans")
+        self.time_on_move.setFont(font)
+        self.time_on_move.setMinimum(10)
+        self.time_on_move.setMaximum(1000)
+        self.time_on_move.setProperty("value", 60)
+        self.ext_layout.addWidget(self.time_on_move, 1, 1, 1, 1)
         # start_button
         self.start_button = QtWidgets.QPushButton(self.verticalLayoutWidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred,
@@ -243,7 +252,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.choose_color_label.setText(_translate("MainWindow", "Цвет"))
         self.ext_label.setText(_translate("MainWindow",
                                           "Дополнительные настройки"))
-        self.field_size_label.setText(_translate("MainWindow", "Размер поля"))
+        self.field_size_label.setText(_translate("MainWindow", "Размер поля:"))
         self.time_game_check.setText(_translate("MainWindow",
                                                 "Игра на время"))
         self.start_button.setText(_translate("MainWindow", "Играть"))
@@ -257,7 +266,8 @@ class MainWindow(QtWidgets.QMainWindow):
             field_params=game_win.gm.field.FieldParams(self.field_size_spin.
                                                        value()),
             main_player=self._main_player,
-            is_time_mode=self.time_game_check.isChecked()
+            is_time_mode=self.time_game_check.isChecked(),
+            second_on_move=self.time_on_move.value()
         )
         game_window = game_win.GameWindow(game_params, self)
         self.hide()
@@ -327,7 +337,8 @@ class MainWindow(QtWidgets.QMainWindow):
             field_params=game_win.gm.field.FieldParams(self.field_size_spin.
                                                        value()),
             main_player=self._main_player,
-            is_time_mode=self.time_game_check.isChecked()
+            is_time_mode=self.time_game_check.isChecked(),
+            second_on_move=self.time_on_move.value()
         )
         out_queue = Queue()
         thread = thr.Thread(target=host_room.wait_connection,
