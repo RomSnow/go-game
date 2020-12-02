@@ -113,42 +113,42 @@ class GameWindow(qtw.QWidget):
 
     def _timeout(self):
         if self.threads:
-            for thread in self.threads:
-                if thread[1].qsize():
-                    thread[0].join()
-                    ans = thread[1].get()
-                    if ans == 0:
-                        self.update()
-                    elif ans == 1:
-                        self.msg = QMessageBox().question(
-                            self,
-                            'Уведомление',
-                            'Противник вышел!',
-                            QMessageBox.Ok
-                        )
-                        self.close()
-                    elif ans == 2:
-                        self.msg = QMessageBox().question(
-                            self,
-                            'Уведомление',
-                            'Ошибка сети!',
-                            QMessageBox.Ok
-                        )
-                        self.close()
-                    elif ans == 'ok':
-                        if self.clock:
-                            self.clock.start()
-                        self.is_waiting.is_up = False
-                        if isinstance(self._connection_service, GuestRoom):
-                            self.wait_move()
-                        self._move_line.setText(
-                            f'Ход игрока: {self._game.current_player}')
-
-                    self.threads = list()
-                    self.threads_timer.stop()
-
+            thread = self.threads.pop()
+            if not thread[1].qsize():
+                self.threads.append(thread)
+            else:
+                self.threads_timer.stop()
+                thread[0].join()
+                ans = thread[1].get()
+                if ans == 0:
+                    self.update()
+                elif ans == 1:
+                    self.msg = QMessageBox().question(
+                        self,
+                        'Уведомление',
+                        'Противник вышел!',
+                        QMessageBox.Ok
+                    )
+                    self.close()
+                elif ans == 2:
+                    self.msg = QMessageBox().question(
+                        self,
+                        'Уведомление',
+                        'Ошибка сети!',
+                        QMessageBox.Ok
+                    )
+                    self.close()
+                elif ans == 'ok':
                     if self.clock:
-                        self.clock.restart()
+                        self.clock.start()
+                    self.is_waiting.is_up = False
+                    if isinstance(self._connection_service, GuestRoom):
+                        self.wait_move()
+                    self._move_line.setText(
+                        f'Ход игрока: {self._game.current_player}')
+
+                if self.clock:
+                    self.clock.restart()
 
     def update(self):
         for button in self._field_buttons:
