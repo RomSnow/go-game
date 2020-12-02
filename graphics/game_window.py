@@ -104,7 +104,7 @@ class GameWindow(qtw.QWidget):
         self._move_line.setText('Ожидание второго игрока')
         queue = Queue()
         thread = Thread(target=self._connection_service.wait_confirm,
-                        args=(queue,))
+                        args=(queue, self.is_waiting))
         self.is_waiting = True
         thread.start()
         self.threads.append((thread, queue))
