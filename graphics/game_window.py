@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import QMessageBox
 from game_core import game_manager as gm
 from graphics.cell_button import CellButton
 from graphics.clock import Clock
+from graphics.wait_window import WaitWindow
 from web.connect_service import ConnectionService
 from web.guest_room import GuestRoom
 from web.web_exceptions import WrongConnection
@@ -32,15 +33,13 @@ class GameWindow(qtw.QWidget):
         self._set_ui(self._game.field_size)
         self.update()
 
-        self.show()
-
         self._wait_confirm()
-
-        if isinstance(connection_service, GuestRoom):
-            self.wait_move()
-
         if self.clock:
             self.clock.start()
+
+        self.show()
+        if isinstance(connection_service, GuestRoom):
+            self.wait_move()
 
     def _set_ui(self, field_size):
         main_grid = qtw.QGridLayout()
@@ -100,7 +99,8 @@ class GameWindow(qtw.QWidget):
     def _wait_confirm(self):
         if not self._connection_service:
             return
-        self._move_line.setText('Ожидание второго игрока')
+        window = WaitWindow()
+
         try:
             self._connection_service.wait_confirm()
         except WrongConnection:
@@ -108,7 +108,7 @@ class GameWindow(qtw.QWidget):
                                        QMessageBox.Ok)
             self.close()
 
-        self._move_line.setText(f'Ход игрока: {self._game.current_player}')
+        window.close()
 
     def _timeout(self):
         if self.threads:
