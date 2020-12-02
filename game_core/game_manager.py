@@ -76,14 +76,17 @@ class Game:
             answer = self._connect_service.wait_move(exit_flag)
         except WrongConnection:
             queue.put(2)
+            exit_flag = False
             return
         data = answer.split()
         if not data or data[0] == 'exit':
             queue.put(1)
             print('exit')
+            exit_flag = False
             return
         self._make_move(data[0], int(data[1]), int(data[2]))
         queue.put(0)
+        exit_flag = False
         print('stop waiting')
 
     def _make_move(self, move: str, x=-1, y=-1, is_ai_move=False):
@@ -124,7 +127,6 @@ class Game:
             if game_window.is_waiting:
                 game_window.is_waiting = False
             else:
-                game_window.is_waiting = True
                 game_window.wait_move()
 
         elif self._is_ai_mode:

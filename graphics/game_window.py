@@ -143,7 +143,6 @@ class GameWindow(qtw.QWidget):
                             f'Ход игрока: {self._game.current_player}')
 
                     self.threads = list()
-                    self.is_waiting = False
                     self.threads_timer.stop()
 
                     if self.clock:
