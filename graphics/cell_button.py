@@ -45,6 +45,8 @@ class CellButton(QPushButton):
                f'border-left-color: {left_border_color}; }}'
 
     def _on_click(self):
+        if self._game_window.is_waiting:
+            return
         try:
             self._game.make_move('move', self._x, self._y)
             self._game_window.update()

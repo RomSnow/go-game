@@ -29,7 +29,7 @@ class GameWindow(qtw.QWidget):
         self._field_buttons = list()
         self.threads = list()
         self.clock = None
-        self.is_waiting_complete = False
+        self.is_waiting = False
         self.exit_flag = False
         self._set_ui(self._game.field_size)
         self.update()
@@ -69,7 +69,8 @@ class GameWindow(qtw.QWidget):
         main_grid.addLayout(field_grid, 1, 0)
 
     def _set_menu(self, main_grid: qtw.QGridLayout):
-        self._move_line = qtw.QLabel(f'Ход игрока: {self._game.current_player}')
+        self._move_line = qtw.QLabel(
+            f'Ход игрока: {self._game.current_player}')
         pass_button = qtw.QPushButton('Pass')
         exit_button = qtw.QPushButton('Exit')
         button_grid = qtw.QGridLayout()
@@ -88,6 +89,8 @@ class GameWindow(qtw.QWidget):
         main_grid.addLayout(menu_grid, 2, 0)
 
     def _pass_move(self):
+        if self.is_waiting:
+            return
         self._game.make_move('pass')
         self.update()
         if self._game.is_online_mode:
@@ -99,32 +102,14 @@ class GameWindow(qtw.QWidget):
                 self.clock.start()
             return
 
+        self._move_line.setText('Ожидание второго игрока')
         queue = Queue()
-        thread = Thread(target=self._create_win,
+        thread = Thread(target=self._connection_service.wait_confirm,
                         args=(queue,))
-        self.is_waiting_complete = True
+        self.is_waiting = True
         thread.start()
         self.threads.append((thread, queue))
-        self.threads_timer.start(0.5)
-        try:
-            self._connection_service.wait_confirm()
-        except WrongConnection:
-            msg = QMessageBox.question(self, 'Ошибка', 'Ошибка сети!',
-                                       QMessageBox.Ok)
-            self.close()
-        finally:
-            self.is_waiting_complete = False
-            if self.clock:
-                self.clock.start()
-            if isinstance(self._connection_service, GuestRoom):
-                self.wait_move()
-
-    def _create_win(self, queue: Queue):
-        window = WaitWindow()
-        while self.is_waiting_complete:
-            time.sleep(0.5)
-
-        queue.put(0)
+        self.threads_timer.start(500)
 
     def _timeout(self):
         if self.threads:
@@ -150,9 +135,16 @@ class GameWindow(qtw.QWidget):
                             QMessageBox.Ok
                         )
                         self.close()
+                    elif ans == 'ok':
+                        if self.clock:
+                            self.clock.start()
+                        if isinstance(self._connection_service, GuestRoom):
+                            self.wait_move()
+                        self._move_line.setText(
+                            f'Ход игрока: {self._game.current_player}')
 
                     self.threads = list()
-                    self.is_waiting_complete = False
+                    self.is_waiting = False
                     self.threads_timer.stop()
 
                     if self.clock:
@@ -177,6 +169,7 @@ class GameWindow(qtw.QWidget):
         thread = Thread(target=self._game.wait_online_move,
                         args=(queue, self.exit_flag))
         self.threads.append((thread, queue))
+        self.is_waiting = True
         thread.start()
         self.threads_timer.start(500)
 
