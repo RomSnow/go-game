@@ -27,7 +27,7 @@ class Clock:
 
     def _interception(self):
         try:
-            self._game.time_limit()
+            self._game.time_limit(self._window)
         except WrongConnection:
             self._timer.stop()
         self._text_label.setText('Время вышло!')
