@@ -18,6 +18,22 @@ class ConnectionService:
             send_str = f'{move} {point.x} {point.y}'
         self._try_to_send(send_str.encode())
 
+    def send_confirm(self):
+        self._try_to_send(b'ok')
+
+    def wait_confirm(self):
+        while True:
+            try:
+                ans = self._connection.recv(2048)
+                if not ans:
+                    continue
+                break
+            except socket.timeout:
+                pass
+
+        if ans.decode() != 'ok':
+            raise WrongConnection
+
     def wait_move(self, exit_flag: bool) -> str:
         self._waiting = True
         while True:

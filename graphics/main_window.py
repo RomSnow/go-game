@@ -313,6 +313,8 @@ class MainWindow(QtWidgets.QMainWindow):
                                                  QtWidgets.QMessageBox.Ok)
             return
 
+        if guest_room:
+            guest_room.send_confirm()
         game_window = game_win.GameWindow(game_params, self, guest_room)
         self.hide()
 
@@ -347,6 +349,8 @@ class MainWindow(QtWidgets.QMainWindow):
                                                  QtWidgets.QMessageBox.Ok)
             return
 
+        if host_room:
+            host_room.send_confirm()
         game_window = game_win.GameWindow(game_params, self, host_room)
         self.hide()
 

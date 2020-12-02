@@ -12,7 +12,6 @@ class Clock:
         self._window = window
 
         self._timer = QTimer()
-        self._timer.start(1000)
         self._timer.timeout.connect(self._timeout)
 
         self._current_time = time_limit
@@ -37,3 +36,6 @@ class Clock:
         self._text_label.setSizePolicy(QSizePolicy.Maximum,
                                        QSizePolicy.Preferred)
         return self._text_label
+
+    def start(self):
+        self._timer.start(1000)

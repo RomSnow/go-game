@@ -10,6 +10,7 @@ from graphics.cell_button import CellButton
 from graphics.clock import Clock
 from web.connect_service import ConnectionService
 from web.guest_room import GuestRoom
+from web.web_exceptions import WrongConnection
 
 
 class GameWindow(qtw.QWidget):
@@ -31,9 +32,14 @@ class GameWindow(qtw.QWidget):
         self._set_ui(self._game.field_size)
         self.update()
 
+        self.show()
+        self._wait_confirm()
+
         if isinstance(connection_service, GuestRoom):
             self.wait_move()
-        self.show()
+
+        if self.clock:
+            self.clock.start()
 
     def _set_ui(self, field_size):
         main_grid = qtw.QGridLayout()
@@ -89,6 +95,14 @@ class GameWindow(qtw.QWidget):
         self.update()
         if self._game.is_online_mode:
             self.wait_move()
+
+    def _wait_confirm(self):
+        try:
+            self._connection_service.wait_confirm()
+        except WrongConnection:
+            msh = QMessageBox.question(self, 'Ошибка', 'Ошибка сети!',
+                                       QMessageBox.Ok)
+            self.close()
 
     def _timeout(self):
         if self.threads:
