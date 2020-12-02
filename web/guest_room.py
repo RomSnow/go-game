@@ -15,7 +15,6 @@ class GuestRoom(ConnectionService):
         sock.settimeout(3)
 
         port = 5000
-        print(self._host_ip)
         try:
             sock.connect((self._host_ip, port))
         except (OSError, socket.timeout):
