@@ -12,6 +12,7 @@ class ConnectionService:
         self._connection = None
         self._socket = None
         self._waiting = False
+        self._is_open = True
 
     def send_move(self, move: str, point: Point = Point(0, 0)):
         if move == 'pass':
@@ -64,7 +65,12 @@ class ConnectionService:
     def send_exit(self):
         self._try_to_send('exit'.encode())
 
+    @property
+    def is_open(self):
+        return self._is_open
+
     def close(self):
+        self._is_open = False
         self._socket.close()
 
     def _try_to_send(self, msg: bytes):

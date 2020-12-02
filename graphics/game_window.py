@@ -177,14 +177,16 @@ class GameWindow(qtw.QWidget):
         result = self._game.get_result()
         white_str = f'Белый: {result["Белый"]} очков'
         black_str = f'Черный: {result["Черный"]} очков'
-        win_string = f'Победитель: {result["Победитель"]} игрок'
-        result_str = f'{white_str}\n{black_str}\n{win_string}\nНачать заново?'
+        win_str = f'Победитель: {result["Победитель"]} игрок'
+        restart_str = 'Начать заново?'
 
         buttons = (qtw.QMessageBox.Yes | qtw.QMessageBox.No, qtw.QMessageBox.No)
 
         if self._game.is_online_mode:
             buttons = (qtw.QMessageBox.Ok,)
+            restart_str = ''
 
+        result_str = f'{white_str}\n{black_str}\n{win_str}\n{restart_str}'
         reply = qtw.QMessageBox.question(self, 'Restart',
                                          result_str,
                                          *buttons
@@ -203,10 +205,14 @@ class GameWindow(qtw.QWidget):
         self._main_win.show()
 
         if self._game.is_online_mode:
-            self._connection_service.send_move('exit')
+            if self._connection_service.is_open:
+                try:
+                    self._connection_service.send_move('exit')
+                except WrongConnection:
+                    pass
             self.is_waiting.is_up = False
-            time.sleep(0.5)
-            self._timeout()
+            for thread in self.threads:
+                thread[0].join()
             self._connection_service.close()
 
         if self.clock:
