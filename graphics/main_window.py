@@ -1,6 +1,7 @@
 import os
 import sys
 import threading as thr
+from queue import Queue
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QIcon
@@ -9,6 +10,7 @@ import graphics.game_window as game_win
 from game_core.game_modes import GameModes
 from web.guest_room import GuestRoom
 from web.host_room import HostRoom
+from web.web_exceptions import WrongConnection
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -303,7 +305,13 @@ class MainWindow(QtWidgets.QMainWindow):
             return
 
         guest_room = GuestRoom(address)
-        game_params = guest_room.set_connection()
+        try:
+            game_params = guest_room.set_connection()
+        except WrongConnection:
+            msg = QtWidgets.QMessageBox.question(self, 'Ошибка',
+                                                 'Ошибка подключения!',
+                                                 QtWidgets.QMessageBox.Ok)
+            return
 
         game_window = game_win.GameWindow(game_params, self, guest_room)
         self.hide()
@@ -319,8 +327,9 @@ class MainWindow(QtWidgets.QMainWindow):
             main_player=self._main_player,
             is_time_mode=self.time_game_check.isChecked()
         )
+        out_queue = Queue()
         thread = thr.Thread(target=host_room.wait_connection,
-                            args=(game_params,))
+                            args=(game_params, out_queue))
         thread.start()
         try:
             w = AddressOutMessage(address)
@@ -328,6 +337,16 @@ class MainWindow(QtWidgets.QMainWindow):
             host_room.cancel()
             return
         thread.join()
+
+        ans = out_queue.get()
+        if ans == 0:
+            pass
+        if ans == 1:
+            msg = QtWidgets.QMessageBox.question(self, 'Ошибка',
+                                                 'Ошибка подключения!',
+                                                 QtWidgets.QMessageBox.Ok)
+            return
+
         game_window = game_win.GameWindow(game_params, self, host_room)
         self.hide()
 

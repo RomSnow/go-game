@@ -1,5 +1,6 @@
 import socket
 import time
+from queue import Queue
 
 import web.web_exceptions as web_exc
 from game_core.game_params import GameParams
@@ -14,11 +15,15 @@ class HostRoom(ConnectionService):
         self._connection = None
 
     def _init_socket(self) -> socket.socket:
-        sock = socket.create_server((self._ip, 5000))
-        sock.settimeout(3)
+        try:
+            sock = socket.create_server((self._ip, 5000))
+            sock.settimeout(3)
+        except OSError:
+            raise web_exc.WrongConnection
         return sock
 
-    def wait_connection(self, game_params: GameParams = None) -> bool:
+    def wait_connection(self, game_params: GameParams = None,
+                        queue: Queue = None) -> bool:
         self._socket.listen(1)
         self._waiting = True
         while True:
@@ -29,9 +34,16 @@ class HostRoom(ConnectionService):
                 if not self._waiting:
                     self._waiting = True
                     return False
+            except OSError:
+                if queue:
+                    queue.put(1)
+                else:
+                    raise web_exc.WrongConnection
 
         self._connection = con
         con.sendall(str(game_params).encode())
+        if queue:
+            queue.put(0)
         return True
 
     @staticmethod
