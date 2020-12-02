@@ -32,7 +32,6 @@ class Game:
         self._current_player = next(self._players)
         self._is_pass = False
         self._connect_service = connect_service
-        self._wait_online_move = False
 
         if is_ai_mode:
             if main_player == 'white':
@@ -67,30 +66,23 @@ class Game:
         return self._field.get_obj_on_position(x - 1, y - 1)
 
     def make_move(self, move: str, x=-1, y=-1, is_ai_move=False):
-        if self._wait_online_move:
-            raise exc.WaitingException
         self._make_move(move, x, y, is_ai_move)
         if self._connect_service:
             self._connect_service.send_move(move, field.Point(x, y))
 
     def wait_online_move(self, queue: Queue, exit_flag: bool):
         print('start waiting')
-        self._exit_flag = exit_flag
-        self._wait_online_move = True
         try:
             answer = self._connect_service.wait_move(exit_flag)
         except WrongConnection:
-            self._wait_online_move = False
             queue.put(2)
             return
         data = answer.split()
         if not data or data[0] == 'exit':
-            self._wait_online_move = False
             queue.put(1)
             print('exit')
             return
         self._make_move(data[0], int(data[1]), int(data[2]))
-        self._wait_online_move = False
         queue.put(0)
         print('stop waiting')
 
@@ -130,12 +122,10 @@ class Game:
         self._switch_player()
         if self.is_online_mode:
             if game_window.is_waiting:
-                if not self._exit_flag:
-                    self._exit_flag = True
+                game_window.is_waiting = False
             else:
                 game_window.is_waiting = True
                 game_window.wait_move()
-
 
         elif self._is_ai_mode:
             self.make_ai_move()

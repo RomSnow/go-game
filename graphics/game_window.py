@@ -166,7 +166,7 @@ class GameWindow(qtw.QWidget):
     def wait_move(self):
         queue = Queue()
         thread = Thread(target=self._game.wait_online_move,
-                        args=(queue, self.exit_flag))
+                        args=(queue, self.is_waiting))
         self.threads.append((thread, queue))
         self.is_waiting = True
         thread.start()
@@ -203,7 +203,9 @@ class GameWindow(qtw.QWidget):
 
         if self._game.is_online_mode:
             self._connection_service.send_move('exit')
-            self.exit_flag = True
+            self.is_waiting = False
+            time.sleep(0.5)
+            self._timeout()
             self._connection_service.close()
 
         if self.clock:

@@ -40,7 +40,7 @@ class ConnectionService:
     def wait_move(self, exit_flag: bool) -> str:
         self._waiting = True
         while True:
-            if exit_flag:
+            if not exit_flag:
                 raise SystemExit
             try:
                 in_str = self._connection.recv(2048)
