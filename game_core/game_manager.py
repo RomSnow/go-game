@@ -74,6 +74,8 @@ class Game:
             self._connect_service.send_move(move, field.Point(x, y))
 
     def wait_online_move(self, queue: Queue, exit_flag: bool):
+        print('start waiting')
+        self._exit_flag = exit_flag
         self._wait_online_move = True
         try:
             answer = self._connect_service.wait_move(exit_flag)
@@ -89,6 +91,7 @@ class Game:
         self._make_move(data[0], int(data[1]), int(data[2]))
         self._wait_online_move = False
         queue.put(0)
+        print('stop waiting')
 
     def _make_move(self, move: str, x=-1, y=-1, is_ai_move=False):
         """Проделывает ход, соответсвующий параметру move
@@ -110,8 +113,6 @@ class Game:
                 self._game_is_on = False
                 return
             self._is_pass = True
-        elif move == 'lim':
-            pass
 
         else:
             raise exc.IncorrectMove
@@ -124,10 +125,16 @@ class Game:
     def make_ai_move(self):
         self._ai.make_move(self)
 
-    def time_limit(self):
+    def time_limit(self, game_window):
         self._switch_player()
         if self.is_online_mode:
-            self._connect_service.send_move('lim')
+            if game_window.is_waiting:
+                if not self._exit_flag:
+                    self._exit_flag = True
+            else:
+                game_window.is_waiting = True
+                game_window.wait_move()
+
 
         elif self._is_ai_mode:
             self.make_ai_move()

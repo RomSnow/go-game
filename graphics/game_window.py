@@ -9,7 +9,6 @@ from PyQt5.QtWidgets import QMessageBox
 from game_core import game_manager as gm
 from graphics.cell_button import CellButton
 from graphics.clock import Clock
-from graphics.wait_window import WaitWindow
 from web.connect_service import ConnectionService
 from web.guest_room import GuestRoom
 from web.web_exceptions import WrongConnection
