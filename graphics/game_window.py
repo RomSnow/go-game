@@ -33,6 +33,7 @@ class GameWindow(qtw.QWidget):
         self.update()
 
         self.show()
+
         self._wait_confirm()
 
         if isinstance(connection_service, GuestRoom):
@@ -97,12 +98,17 @@ class GameWindow(qtw.QWidget):
             self.wait_move()
 
     def _wait_confirm(self):
+        if not self._connection_service:
+            return
+        self._move_line.setText('Ожидание второго игрока')
         try:
             self._connection_service.wait_confirm()
         except WrongConnection:
             msh = QMessageBox.question(self, 'Ошибка', 'Ошибка сети!',
                                        QMessageBox.Ok)
             self.close()
+
+        self._move_line.setText(f'Ход игрока: {self._game.current_player}')
 
     def _timeout(self):
         if self.threads:
