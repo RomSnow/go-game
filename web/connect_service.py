@@ -22,7 +22,7 @@ class ConnectionService:
     def send_confirm(self):
         self._try_to_send(b'ok')
 
-    def wait_confirm(self, queue: Queue):
+    def wait_confirm(self):
         while True:
             try:
                 ans = self._connection.recv(2048)
@@ -33,9 +33,7 @@ class ConnectionService:
                 pass
 
         if ans.decode() != 'ok':
-            queue.put(1)
-            return
-        queue.put(0)
+            raise WrongConnection
 
     def wait_move(self, exit_flag: bool) -> str:
         self._waiting = True

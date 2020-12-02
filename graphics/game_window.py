@@ -1,3 +1,4 @@
+import time
 from queue import Queue
 from threading import Thread
 
@@ -34,12 +35,8 @@ class GameWindow(qtw.QWidget):
         self.update()
 
         self._wait_confirm()
-        if self.clock:
-            self.clock.start()
 
         self.show()
-        if isinstance(connection_service, GuestRoom):
-            self.wait_move()
 
     def _set_ui(self, field_size):
         main_grid = qtw.QGridLayout()
@@ -98,20 +95,36 @@ class GameWindow(qtw.QWidget):
 
     def _wait_confirm(self):
         if not self._connection_service:
+            if self.clock:
+                self.clock.start()
             return
-        window = WaitWindow()
 
         queue = Queue()
-        thread = Thread(target=self._connection_service.wait_confirm,
+        thread = Thread(target=self._create_win,
                         args=(queue,))
+        self.is_waiting_complete = True
         thread.start()
-        thread.join()
-
-        if queue.get():
-            msh = QMessageBox.question(self, 'Ошибка', 'Ошибка сети!',
+        self.threads.append((thread, queue))
+        self.threads_timer.start(0.5)
+        try:
+            self._connection_service.wait_confirm()
+        except WrongConnection:
+            msg = QMessageBox.question(self, 'Ошибка', 'Ошибка сети!',
                                        QMessageBox.Ok)
-        window.close()
-        self.close()
+            self.close()
+        finally:
+            self.is_waiting_complete = False
+            if self.clock:
+                self.clock.start()
+            if isinstance(self._connection_service, GuestRoom):
+                self.wait_move()
+
+    def _create_win(self, queue: Queue):
+        window = WaitWindow()
+        while self.is_waiting_complete:
+            time.sleep(0.5)
+
+        queue.put(0)
 
     def _timeout(self):
         if self.threads:
