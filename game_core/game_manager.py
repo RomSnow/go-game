@@ -76,6 +76,7 @@ class Game:
         try:
             answer = self._connect_service.wait_move(exit_flag)
         except SystemExit:
+            print('stop waiting')
             exit_flag.is_up = False
             queue.put(0)
             return
