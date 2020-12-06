@@ -1,10 +1,9 @@
 import os
-from queue import Queue
-from threading import Thread
 
 from PyQt5.QtCore import QSize
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QPushButton, QMessageBox
+from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QPushButton, QMessageBox, QSizePolicy
 
 from game_core import game_manager as gm
 
@@ -18,12 +17,14 @@ class CellButton(QPushButton):
         self._field_size = field_size
         self._game = game
         self._game_window = game_window
+        self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
         self.clicked.connect(self._on_click)
         self.setStyleSheet(self._get_style_str())
 
     def _get_style_str(self) -> str:
-        size = int(5 / self._field_size * 10)
+        proportion = QApplication.desktop().width() / 1920
+        size = int(5 / self._field_size * 100 * proportion)
 
         left_border_color = \
             'transparent' if self._x == 0 else 'black'
@@ -35,8 +36,8 @@ class CellButton(QPushButton):
             = 'transparent' if self._y == self._field_size - 1 else 'black'
 
         return f'CellButton {{ margin: 0ex;' \
-               f'width: {size}ex; ' \
-               f'height: {size}ex; ' \
+               f'width: {size}px; ' \
+               f'height: {size}px; ' \
                f'border-style: solid; ' \
                f'border-width: 1px; ' \
                f'border-top-color: {up_border_color}; ' \
