@@ -1,10 +1,9 @@
 """Модуль для работы с игровым полем"""
 
 from dataclasses import dataclass
-from typing import Tuple
 
-import game_core.special_exceptions as exc
 import game_core.player as player
+import game_core.special_exceptions as exc
 
 
 class FieldParams:
@@ -13,6 +12,12 @@ class FieldParams:
     def __init__(self, size):
         self.lines_count = size
         self.column_count = size
+
+
+@dataclass
+class Point:
+    x: int
+    y: int
 
 
 class GameField:
@@ -48,8 +53,11 @@ class GameField:
             return OutsideStone()
 
     def set_stone_on_position(self, master: player.Player, x: int, y: int):
-        if self._field[y][x]:
-            raise exc.BusyPoint
+        try:
+            if self._field[y][x]:
+                raise exc.BusyPoint
+        except IndexError:
+            raise exc.IncorrectMove
 
         if (x, y) == master.last_move:
             raise exc.KOException
@@ -60,25 +68,19 @@ class GameField:
         master.last_move = (x, y)
         return stone
 
-    def get_neighbor_count_on_position(self,
-                                       x: int, y: int, master: player.Player
-                                       ) -> Tuple[int, int]:
-        friend_count = 0
-        enemy_count = 0
+    def get_neighbor_on_position(self, point: Point):
         for shift_x in (-1, 0, 1):
             for shift_y in (-1, 0, 1):
                 if shift_x and shift_y or shift_x == shift_y:
                     continue
 
-                stone = self.get_obj_on_position(x + shift_x, y + shift_y)
+                stone = self.get_obj_on_position(point.x + shift_x,
+                                                 point.y + shift_y)
 
-                if isinstance(stone, master.stone_type):
-                    friend_count += 1
-                elif not isinstance(stone, OutsideStone)\
-                        and stone is not None:
-                    enemy_count += 1
+                if isinstance(stone, OutsideStone) or not stone:
+                    continue
 
-        return friend_count, enemy_count
+                yield stone
 
     def remove_stone_on_position(self, x: int, y: int):
         self._field[y][x] = None
@@ -101,9 +103,3 @@ class GameField:
 
 class OutsideStone:
     """Класс камней лежащих вне поля"""
-
-
-@dataclass
-class Point:
-    x: int
-    y: int

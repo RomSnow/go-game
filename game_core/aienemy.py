@@ -24,31 +24,26 @@ class AIEnemy:
 
     def get_cell_attractiveness(self, point: Point) -> int:
         attractiveness = 0
-        neighbors = self._interior_game.game_field. \
-            get_neighbor_count_on_position(point.x, point.y, self._player)
+        if not self._interior_game.game_field\
+                .get_obj_on_position(point.x, point.y):
+            for neighbor in self._interior_game.\
+                    game_field.get_neighbor_on_position(point):
+                if neighbor.breaths == 1:
+                    attractiveness += 200
+                attractiveness += 100 - neighbor.breaths * 5
 
-        attractiveness += neighbors[0] * 2
-        attractiveness += neighbors[1]
-
-        try:
-            self._interior_game.make_move('move', point.x + 1, point.y + 1)
-        except IncorrectMove:
-            return 0
-
-        score = self._interior_game.get_result()
-        player_name = 'Белый' if str(self._player) == 'белый' else 'Черный'
-        player_score = score[player_name]
-
-        return attractiveness + player_score
+        return attractiveness
 
     def get_best_move(self) -> Point:
-        with Pool(processes=self._interior_game.field_size) as pool:
-            ans = pool.map(self.get_cell_attractiveness, self.points_set)
+        results = list()
+        for point in self.points_set:
+            results.append(self.get_cell_attractiveness(point))
 
-        best_point = self.points_set[random.randint(0, len(self.points_set))]
+        best_point = self.points_set[
+            random.randint(0, len(self.points_set) - 1)]
         best_score = 0
 
-        for index, point_score in enumerate(ans):
+        for index, point_score in enumerate(results):
             if point_score > best_score:
                 best_score = point_score
                 best_point = self.points_set[index]
@@ -57,16 +52,15 @@ class AIEnemy:
 
     def make_move(self, game):
         if game.is_field_filled:
-            game.make_move('pass')
+            game.make_move('pass', True)
 
-        self._copy_game(game)
         best_move_point = self.get_best_move()
 
         x_move = best_move_point.x
         y_move = best_move_point.y
         while True:
             try:
-                game.make_move('move', x_move + 1, y_move + 1)
+                game.make_move('move', x_move + 1, y_move + 1, True)
                 break
             except IncorrectMove:
                 x_move = random.randint(0, game.field_size)

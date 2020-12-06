@@ -53,18 +53,18 @@ class GameManagerTests(unittest.TestCase):
                        self.black_player, 'white')
 
         game.make_move('move', 2, 1)
-        game.make_move('move', 1, 1)
+        game.make_move('move', 1, 2)
         game.make_move('move', 3, 2)
 
         ai_enemy = ai.AIEnemy(self.black_player, game)
-        self.assertEqual(ai_enemy.get_cell_attractiveness(Point(1, 1)), 2)
+        self.assertEqual(ai_enemy.get_cell_attractiveness(Point(1, 1)), 21)
 
     def test_get_best_move(self):
-        game = gm.Game(gm.field.FieldParams(3), self.white_player,
+        game = gm.Game(gm.field.FieldParams(9), self.white_player,
                        self.black_player, 'white')
 
         game.make_move('move', 2, 1)
-        game.make_move('move', 1, 1)
+        game.make_move('move', 1, 2)
         game.make_move('move', 3, 2)
 
         ai_enemy = ai.AIEnemy(self.white_player, game)

@@ -168,21 +168,6 @@ class CoreTestCase(unittest.TestCase):
         self.assertRaises(sp_exc.KOException, field.set_stone_on_position,
                           black_master, 1, 0)
 
-    def test_neighbor_count(self):
-        field = fld.GameField(fld.FieldParams(3))
-        black_master = player.Player(stones.BlackStone)
-        white_master = player.Player(stones.WhiteStone)
-
-        field.set_stone_on_position(black_master, 0, 0)
-        field.set_stone_on_position(black_master, 0, 1)
-        field.set_stone_on_position(black_master, 0, 2)
-
-        field.set_stone_on_position(white_master, 1, 0)
-        field.set_stone_on_position(white_master, 2, 0)
-
-        neigh_count = field.get_neighbor_count_on_position(1, 1, black_master)
-        self.assertEqual(sum(neigh_count), 2)
-
 
 if __name__ == '__main__':
     unittest.main()
