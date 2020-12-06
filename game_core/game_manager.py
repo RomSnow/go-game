@@ -6,7 +6,7 @@ import game_core.field as field
 import game_core.player as player
 import game_core.stones as stones
 import game_core.special_exceptions as exc
-import game_core.ai_enemy as ai
+import game_core.aienemy as ai
 from game_core.game_modes import GameModes
 from game_core.game_params import GameParams
 from web.connect_service import ConnectionService
@@ -62,6 +62,10 @@ class Game:
     @property
     def field_size(self):
         return self._field.field_params.column_count
+
+    @property
+    def game_field(self):
+        return self._field
 
     def get_stone_on_position(self, x, y) -> stones.Stone:
         return self._field.get_obj_on_position(x - 1, y - 1)
@@ -200,7 +204,7 @@ class Game:
         self._current_player = next(self._players)
 
     def _init_ai(self, ai_player: player.Player):
-        self._ai = ai.Ai_enemy(ai_player)
+        self._ai = ai.AIEnemy(ai_player, self)
         ai_player.set_ai_mode()
         self._is_ai_mode = True
 

@@ -1,6 +1,7 @@
 """Модуль для работы с игровым полем"""
 
 from dataclasses import dataclass
+from typing import Tuple
 
 import game_core.special_exceptions as exc
 import game_core.player as player
@@ -58,6 +59,26 @@ class GameField:
         self._field[y][x] = stone
         master.last_move = (x, y)
         return stone
+
+    def get_neighbor_count_on_position(self,
+                                       x: int, y: int, master: player.Player
+                                       ) -> Tuple[int, int]:
+        friend_count = 0
+        enemy_count = 0
+        for shift_x in (-1, 0, 1):
+            for shift_y in (-1, 0, 1):
+                if shift_x and shift_y or shift_x == shift_y:
+                    continue
+
+                stone = self.get_obj_on_position(x + shift_x, y + shift_y)
+
+                if isinstance(stone, master.stone_type):
+                    friend_count += 1
+                elif not isinstance(stone, OutsideStone)\
+                        and stone is not None:
+                    enemy_count += 1
+
+        return friend_count, enemy_count
 
     def remove_stone_on_position(self, x: int, y: int):
         self._field[y][x] = None

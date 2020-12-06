@@ -1,6 +1,8 @@
 import unittest
 
 import game_core.game_manager as gm
+import game_core.aienemy as ai
+from game_core.field import Point
 
 
 class GameManagerTests(unittest.TestCase):
@@ -45,6 +47,30 @@ class GameManagerTests(unittest.TestCase):
 
         self.black_player.reset()
         self.white_player.reset()
+
+    def test_ai_score_on_position(self):
+        game = gm.Game(gm.field.FieldParams(3), self.white_player,
+                       self.black_player, 'white')
+
+        game.make_move('move', 2, 1)
+        game.make_move('move', 1, 1)
+        game.make_move('move', 3, 2)
+
+        ai_enemy = ai.AIEnemy(self.black_player, game)
+        self.assertEqual(ai_enemy.get_cell_attractiveness(Point(1, 1)), 2)
+
+    def test_get_best_move(self):
+        game = gm.Game(gm.field.FieldParams(3), self.white_player,
+                       self.black_player, 'white')
+
+        game.make_move('move', 2, 1)
+        game.make_move('move', 1, 1)
+        game.make_move('move', 3, 2)
+
+        ai_enemy = ai.AIEnemy(self.white_player, game)
+        best_point = ai_enemy.get_best_move()
+        self.assertEqual(best_point.x, 1)
+        self.assertEqual(best_point.y, 1)
 
 
 if __name__ == '__main__':
