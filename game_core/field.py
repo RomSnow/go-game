@@ -77,9 +77,6 @@ class GameField:
                 stone = self.get_obj_on_position(point.x + shift_x,
                                                  point.y + shift_y)
 
-                if isinstance(stone, OutsideStone) or not stone:
-                    continue
-
                 yield stone
 
     def remove_stone_on_position(self, x: int, y: int):
