@@ -177,35 +177,39 @@ class GameWindow(qtw.QWidget):
         self.threads_timer.start(500)
 
     def _get_player_name(self):
+        white_ok = black_ok = False
+        white_name = black_name = None
         if self._score_board:
-            while True:
-                white_name, white_ok = qtw.QInputDialog. \
-                    getText(self, 'Запись результатов',
-                            'Введите имя белого игрока\n'
-                            '(без пробелов, не более 12 символов):')
-                if (len(white_name) > 12 or len(white_name) < 1
+            if (self._game.is_online_mode and
+                self._game_params.main_player == 'white') or \
+                    not self._game.is_online_mode:
+                while True:
+                    white_name, white_ok = qtw.QInputDialog. \
+                        getText(self, 'Запись результатов',
+                                'Введите имя белого игрока\n'
+                                '(без пробелов, не более 12 символов):')
+                    if (len(white_name) > 12 or len(white_name) < 1
                         or ' ' in white_name) and white_ok:
-                    msg = qtw.QMessageBox.question(self, 'Ошибка имени',
-                                                   'Неверный формат имени',
-                                                   qtw.QMessageBox.Ok)
-                    continue
-                break
-
-            while True:
-                black_name, black_ok = qtw.QInputDialog. \
-                    getText(self, 'Запись результатов',
-                            'Введите имя черного игрока\n'
-                            '(без пробелов, не более 12 символов):')
-                if (len(black_name) > 12 or len(black_name) < 1
-                        or ' ' in black_name) and black_ok:
-                    msg = qtw.QMessageBox.question(self, 'Ошибка имени',
-                                                   'Неверный формат имени',
-                                                   qtw.QMessageBox.Ok)
-                    continue
-                break
-        else:
-            white_ok = black_ok = False
-            white_name = black_name = None
+                        msg = qtw.QMessageBox.question(self, 'Ошибка имени',
+                                                       'Неверный формат имени',
+                                                       qtw.QMessageBox.Ok)
+                        continue
+                    break
+            if (self._game.is_online_mode and
+                self._game_params.main_player == 'black') or \
+                    not self._game.is_online_mode:
+                while True:
+                    black_name, black_ok = qtw.QInputDialog. \
+                        getText(self, 'Запись результатов',
+                                'Введите имя черного игрока\n'
+                                '(без пробелов, не более 12 символов):')
+                    if (len(black_name) > 12 or len(black_name) < 1 or
+                        ' ' in black_name) and black_ok:
+                        msg = qtw.QMessageBox.question(self, 'Ошибка имени',
+                                                       'Неверный формат имени',
+                                                       qtw.QMessageBox.Ok)
+                        continue
+                    break
 
         return white_name, white_ok, black_name, black_ok
 
