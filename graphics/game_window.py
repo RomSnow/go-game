@@ -1,4 +1,3 @@
-import time
 from queue import Queue
 from threading import Thread
 
@@ -249,6 +248,7 @@ class GameWindow(qtw.QWidget):
                                          )
 
         if reply == qtw.QMessageBox.Yes:
+            self.log_window.close()
             self._game = gm.create_game(self._game_params)
             for button in self._field_buttons:
                 button.set_game_condition(self._game)

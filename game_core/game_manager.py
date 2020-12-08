@@ -156,7 +156,8 @@ class Game:
         points = 0
         points += current_player.hostages_count
         points += self._define_territory(current_player)
-
+        if points == self.field_size * self.field_size:
+            points = 0
         return points
 
     def _define_territory(self, current_player: player.Player):
