@@ -5,7 +5,7 @@ import threading as thr
 from PyQt5 import QtWidgets
 
 import game_core.game_manager as gm
-from graphics.board_win import ScoreBoardWindow
+from graphics.board_win import BoardWindow
 from graphics.game_window import GameWindow
 from web.guest_room import GuestRoom
 from web.host_room import HostRoom
@@ -122,8 +122,8 @@ class ButtonFunc:
         self.main_window.hide()
 
     def record_button_func(self):
-        self._score_board = ScoreBoardWindow(self.main_window.score_board,
-                                             self.main_window)
+        self._score_board = BoardWindow(self.main_window.score_board,
+                                        self.main_window)
 
 
 class AddressOutMessage(QtWidgets.QMessageBox):

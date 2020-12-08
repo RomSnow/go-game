@@ -7,6 +7,7 @@ import game_core.player as player
 import game_core.stones as stones
 import game_core.special_exceptions as exc
 import game_core.aienemy as ai
+from game_core.board_managers import LogBoardManager
 from game_core.game_modes import GameModes
 from game_core.game_params import GameParams
 from web.connect_service import ConnectionService
@@ -15,6 +16,7 @@ from web.web_exceptions import WrongConnection
 
 
 class Game:
+    """Класс, хранящий все данные текущей игры и управляющий ее ходом"""
     def __init__(self, field_params: field.FieldParams,
                  white_player: player.Player,
                  black_player: player.Player,
@@ -33,6 +35,7 @@ class Game:
         self._current_player = next(self._players)
         self._is_pass = False
         self._connect_service = connect_service
+        self._log_manager = LogBoardManager()
 
         if is_ai_mode:
             if main_player == 'white':
@@ -45,7 +48,9 @@ class Game:
             if self.current_player == enemy:
                 self.make_ai_move()
 
-    """Класс, хранящий все данные текущей игры и управляющий ее ходом"""
+    @property
+    def log_manager(self):
+        return self._log_manager
 
     @property
     def game_is_on(self):
@@ -120,6 +125,9 @@ class Game:
         else:
             raise exc.IncorrectMove
 
+        self.log_manager.set_log(f'{move} {x if x > -1 else ""}'
+                                 f' {y if y > -1 else ""}',
+                                 str(self.current_player))
         self._switch_player()
 
         if self._is_ai_mode and not is_ai_move:
@@ -129,6 +137,7 @@ class Game:
         self._ai.make_move(self)
 
     def time_limit(self, game_window):
+        self.log_manager.set_log('time limit', str(self.current_player))
         self._switch_player()
         if self.is_online_mode:
             if game_window.is_waiting:

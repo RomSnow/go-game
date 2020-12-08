@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import QMessageBox
 
 from game_core import game_manager as gm
 from game_core.board_managers import ScoreBoardManager
+from graphics.board_win import BoardWindow
 from graphics.cell_button import CellButton
 from graphics.clock import Clock
 from web.connect_service import ConnectionService
@@ -35,6 +36,7 @@ class GameWindow(qtw.QWidget):
         self.is_waiting = Flag()
         self.exit_flag = False
         self._set_ui(self._game.field_size)
+        self.log_window = None
         self.update()
 
         self._wait_confirm()
@@ -74,15 +76,18 @@ class GameWindow(qtw.QWidget):
     def _set_menu(self, main_grid: qtw.QGridLayout):
         self._move_line = qtw.QLabel(
             f'Ход игрока: {self._game.current_player}')
-        pass_button = qtw.QPushButton('Pass')
-        exit_button = qtw.QPushButton('Exit')
+        history_button = qtw.QPushButton('История')
+        pass_button = qtw.QPushButton('Пасс')
+        exit_button = qtw.QPushButton('Выход')
         button_grid = qtw.QGridLayout()
 
+        history_button.clicked.connect(self._show_logs)
         pass_button.clicked.connect(self._pass_move)
         exit_button.clicked.connect(self.close)
 
         button_grid.addWidget(pass_button, 0, 1)
-        button_grid.addWidget(exit_button, 0, 2)
+        button_grid.addWidget(history_button, 0, 2)
+        button_grid.addWidget(exit_button, 0, 3)
 
         menu_grid = qtw.QGridLayout()
         menu_grid.addWidget(self._move_line, 0, 0)
@@ -161,6 +166,9 @@ class GameWindow(qtw.QWidget):
             self.clock.restart()
 
         self._move_line.setText(f'Ход игрока: {self._game.current_player}')
+
+        if self.log_window:
+            self.log_window.update_text()
 
         if not self._game.game_is_on:
             self._restart_game()
@@ -249,8 +257,14 @@ class GameWindow(qtw.QWidget):
             self._win_close = True
             self.close()
 
+    def _show_logs(self):
+        self.log_window = BoardWindow(self._game.log_manager, self)
+
     def closeEvent(self, a0) -> None:
         self._main_win.show()
+
+        if self.log_window:
+            self.log_window.close()
 
         if self._game.is_online_mode:
             if self._connection_service.is_open:

@@ -64,3 +64,17 @@ class ScoreBoardManager(BoardManager):
 
         with open(self._file_name, 'w') as file:
             file.writelines(lines)
+
+
+class LogBoardManager(BoardManager):
+    def __init__(self):
+        self.logs = list()
+
+    def get_board_str(self) -> str:
+        return '\n'.join(self.logs)
+
+    def get_board_name(self):
+        return 'История действий'
+
+    def set_log(self, log: str, player: str):
+        self.logs.append(f'{player}: {log}')
