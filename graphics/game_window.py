@@ -7,6 +7,7 @@ from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QMessageBox
 
 from game_core import game_manager as gm
+from game_core.board_managers import ScoreBoardManager
 from graphics.cell_button import CellButton
 from graphics.clock import Clock
 from web.connect_service import ConnectionService
@@ -19,10 +20,12 @@ class GameWindow(qtw.QWidget):
 
     def __init__(self, game_params: gm.GameParams,
                  main_window: qtw.QMainWindow,
-                 connection_service: ConnectionService = None):
+                 connection_service: ConnectionService = None,
+                 score_board: ScoreBoardManager = None):
         super().__init__()
         self._main_win = main_window
         self._connection_service = connection_service
+        self._score_board = score_board
         self._win_close = False
         self._game_params = game_params
         self._game = gm.create_game(game_params, connection_service)
@@ -173,12 +176,53 @@ class GameWindow(qtw.QWidget):
         thread.start()
         self.threads_timer.start(500)
 
+    def _get_player_name(self):
+        if self._score_board:
+            while True:
+                white_name, white_ok = qtw.QInputDialog. \
+                    getText(self, 'Запись результатов',
+                            'Введите имя белого игрока\n'
+                            '(без пробелов, не более 12 символов):')
+                if (len(white_name) > 12 or len(white_name) < 1
+                        or ' ' in white_name) and white_ok:
+                    msg = qtw.QMessageBox.question(self, 'Ошибка имени',
+                                                   'Неверный формат имени',
+                                                   qtw.QMessageBox.Ok)
+                    continue
+                break
+
+            while True:
+                black_name, black_ok = qtw.QInputDialog. \
+                    getText(self, 'Запись результатов',
+                            'Введите имя черного игрока\n'
+                            '(без пробелов, не более 12 символов):')
+                if (len(black_name) > 12 or len(black_name) < 1
+                        or ' ' in black_name) and black_ok:
+                    msg = qtw.QMessageBox.question(self, 'Ошибка имени',
+                                                   'Неверный формат имени',
+                                                   qtw.QMessageBox.Ok)
+                    continue
+                break
+        else:
+            white_ok = black_ok = False
+            white_name = black_name = None
+
+        return white_name, white_ok, black_name, black_ok
+
     def _restart_game(self):
+
+        white_name, white_ok, black_name, black_ok = self._get_player_name()
+
         result = self._game.get_result()
         white_str = f'Белый: {result["Белый"]} очков'
         black_str = f'Черный: {result["Черный"]} очков'
         win_str = f'Победитель: {result["Победитель"]} игрок'
         restart_str = 'Начать заново?'
+
+        if white_ok:
+            self._score_board.set_player_score(white_name, result["Белый"])
+        if black_ok:
+            self._score_board.set_player_score(black_name, result["Черный"])
 
         buttons = (qtw.QMessageBox.Yes | qtw.QMessageBox.No, qtw.QMessageBox.No)
 

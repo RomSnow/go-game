@@ -4,11 +4,13 @@ from game_core.board_managers import BoardManager
 
 
 class ScoreBoardWindow(qtw.QWidget):
-    def __init__(self, board_manager: BoardManager):
+    def __init__(self, board_manager: BoardManager, main_window):
         super().__init__()
         self._board = board_manager
         self._init_ui()
         self.show()
+        self.main_window = main_window
+        main_window.hide()
 
     def _init_ui(self):
         self.setFixedSize(480, 600)
@@ -30,3 +32,6 @@ class ScoreBoardWindow(qtw.QWidget):
         main_label.addWidget(ok_button)
 
         self.setLayout(main_label)
+
+    def closeEvent(self, a0):
+        self.main_window.show()

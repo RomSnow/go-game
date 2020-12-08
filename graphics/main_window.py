@@ -4,7 +4,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QIcon
 
 import graphics.game_window as game_win
-from web.main_button_func import ButtonFunc
+from game_core.board_managers import ScoreBoardManager
+from graphics.main_button_func import ButtonFunc
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -14,6 +15,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.choose_color_buttons = list()
         self.game_mode = game_win.gm.GameModes.local
         self.main_player = 'white'
+        self.score_board = ScoreBoardManager('score_board.txt')
         self.bt_func = ButtonFunc(self)
         self.setupUi(self)
         self.retranslateUi(self)

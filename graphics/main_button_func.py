@@ -1,9 +1,11 @@
+import time
 from queue import Queue
 import threading as thr
 
 from PyQt5 import QtWidgets
 
 import game_core.game_manager as gm
+from graphics.board_win import ScoreBoardWindow
 from graphics.game_window import GameWindow
 from web.guest_room import GuestRoom
 from web.host_room import HostRoom
@@ -23,7 +25,8 @@ class ButtonFunc:
             is_time_mode=self.main_window.time_game_check.isChecked(),
             second_on_move=self.main_window.time_on_move.value()
         )
-        game_window = GameWindow(game_params, self.main_window)
+        game_window = GameWindow(game_params, self.main_window,
+                                 score_board=self.main_window.score_board)
         self.main_window.hide()
 
     def game_type_buttons_func(self, clicked_button):
@@ -119,7 +122,8 @@ class ButtonFunc:
         self.main_window.hide()
 
     def record_button_func(self):
-        pass
+        self._score_board = ScoreBoardWindow(self.main_window.score_board,
+                                             self.main_window)
 
 
 class AddressOutMessage(QtWidgets.QMessageBox):
