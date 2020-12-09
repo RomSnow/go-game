@@ -25,8 +25,10 @@ class ButtonFunc:
             is_time_mode=self.main_window.time_game_check.isChecked(),
             second_on_move=self.main_window.time_on_move.value()
         )
-        game_window = GameWindow(game_params, self.main_window,
-                                 score_board=self.main_window.score_board)
+        self.main_window.game_window = GameWindow(
+            game_params,
+            self.main_window,
+            score_board=self.main_window.score_board)
         self.main_window.hide()
 
     def game_type_buttons_func(self, clicked_button):
@@ -82,7 +84,9 @@ class ButtonFunc:
 
         if guest_room:
             guest_room.send_confirm()
-        game_window = GameWindow(game_params, self.main_window, guest_room)
+        self.main_window.game_window = GameWindow(game_params,
+                                                  self.main_window,
+                                                  guest_room)
         self.main_window.hide()
 
     def create_button_func(self):
@@ -118,7 +122,9 @@ class ButtonFunc:
 
         if host_room:
             host_room.send_confirm()
-        game_window = GameWindow(game_params, self.main_window, host_room)
+        self.main_window.game_window = GameWindow(game_params,
+                                                  self.main_window,
+                                                  host_room)
         self.main_window.hide()
 
     def record_button_func(self):

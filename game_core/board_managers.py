@@ -14,6 +14,7 @@ class BoardManager:
 
 class ScoreBoardManager(BoardManager):
     def __init__(self, score_file_name: str):
+        self.is_debug = False
         self._file_name = score_file_name
         self.score_table = dict()
         self._read_board()
@@ -63,7 +64,8 @@ class ScoreBoardManager(BoardManager):
             i += 1
 
         with open(self._file_name, 'w') as file:
-            file.writelines(lines)
+            if not self.is_debug:
+                file.writelines(lines)
 
 
 class LogBoardManager(BoardManager):

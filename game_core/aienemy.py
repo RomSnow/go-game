@@ -1,10 +1,9 @@
-import random
 import copy
-from multiprocessing import Process, Pool
+import random
 from typing import List
 
-from game_core.special_exceptions import IncorrectMove
 from game_core.field import Point, OutsideStone
+from game_core.special_exceptions import IncorrectMove
 
 
 class AIEnemy:

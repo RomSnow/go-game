@@ -7,15 +7,21 @@ import graphics.game_window as game_win
 from game_core.board_managers import ScoreBoardManager
 from graphics.main_button_func import ButtonFunc
 
+PATH_TO_FILE = os.path.dirname(__file__)
+
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
+        self.is_debug = False
+        self.game_window = None
         self.game_type_buttons = list()
         self.choose_color_buttons = list()
         self.game_mode = game_win.gm.GameModes.local
         self.main_player = 'white'
-        self.score_board = ScoreBoardManager('score_board.txt')
+        self.score_board = ScoreBoardManager(
+            f'{PATH_TO_FILE}/../score_board.txt'
+        )
         self.bt_func = ButtonFunc(self)
         self.setupUi(self)
         self.retranslateUi(self)

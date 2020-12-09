@@ -1,3 +1,4 @@
+import time
 import unittest
 
 import game_core.game_manager as gm
@@ -70,6 +71,55 @@ class GameManagerTests(unittest.TestCase):
         ai_enemy = ai.AIEnemy(self.white_player, game)
         best_points = ai_enemy.get_best_move()
         self.assertEqual(best_points, [Point(1, 1)])
+
+    def test_ai_move(self):
+        ai_player = gm.player.Player(gm.stones.BlackStone, True)
+        game = gm.Game(gm.field.FieldParams(9), self.white_player,
+                       ai_player, 'white', True)
+
+        game.make_move('move', 2, 2)
+        self.assertEqual(self.white_player, game.current_player)
+
+    def test_ai_incorrect_move(self):
+        ai_player = gm.player.Player(gm.stones.BlackStone, True)
+        game = gm.Game(gm.field.FieldParams(9), self.white_player,
+                       ai_player, 'white', True)
+
+        for x in range(game.field_size):
+            for y in range(game.field_size):
+                if not game.is_field_filled:
+                    try:
+                        game.make_move('move', x, y)
+                    except (gm.exc.BusyPoint, gm.exc.KOException,
+                            gm.exc.SuicideMove):
+                        pass
+
+    def test_log(self):
+        game = gm.Game(gm.field.FieldParams(5), self.white_player,
+                       self.black_player, 'white')
+        game.make_move('move', 1, 1)
+        self.assertEqual(game.log_manager.get_board_str(), 'белый: move 1 1')
+        self.assertEqual(game.log_manager.get_board_name(), 'История действий')
+
+    def test_get_result(self):
+        game = gm.Game(gm.field.FieldParams(5), self.white_player,
+                       self.black_player, 'white')
+
+        self.assertEqual(game.get_result(), {'Черный': 0,
+                                             'Белый': 0,
+                                             'Победитель': 'Черный'})
+
+    def test_create_game(self):
+        field_par = gm.field.FieldParams(9)
+        game = gm.create_game(
+            gm.GameParams(game_mode=gm.GameModes.local,
+                          field_params=field_par,
+                          is_time_mode=False,
+                          ))
+
+        self.assertEqual(9, game.field_size)
+        self.assertEqual('белый', str(game.current_player))
+        self.assertEqual(False, game.is_online_mode)
 
 
 if __name__ == '__main__':

@@ -1,5 +1,6 @@
 from queue import Queue
 from threading import Thread
+from typing import List
 
 from PyQt5 import QtWidgets as qtw
 from PyQt5.QtCore import QTimer
@@ -29,7 +30,7 @@ class GameWindow(qtw.QWidget):
         self._win_close = False
         self._game_params = game_params
         self._game = gm.create_game(game_params, connection_service)
-        self._field_buttons = list()
+        self.field_buttons: List[CellButton] = list()
         self.threads = list()
         self.clock = None
         self.is_waiting = Flag()
@@ -65,7 +66,7 @@ class GameWindow(qtw.QWidget):
         for i in range(field_size):
             for j in range(field_size):
                 button = CellButton((j, i), field_size, self._game, self)
-                self._field_buttons.append(button)
+                self.field_buttons.append(button)
                 field_grid.addWidget(
                     button, i, j
                 )
@@ -75,18 +76,18 @@ class GameWindow(qtw.QWidget):
     def _set_menu(self, main_grid: qtw.QGridLayout):
         self._move_line = qtw.QLabel(
             f'Ход игрока: {self._game.current_player}')
-        history_button = qtw.QPushButton('История')
-        pass_button = qtw.QPushButton('Пасс')
-        exit_button = qtw.QPushButton('Выход')
+        self.history_button = qtw.QPushButton('История')
+        self.pass_button = qtw.QPushButton('Пасс')
+        self.exit_button = qtw.QPushButton('Выход')
         button_grid = qtw.QGridLayout()
 
-        history_button.clicked.connect(self._show_logs)
-        pass_button.clicked.connect(self._pass_move)
-        exit_button.clicked.connect(self.close)
+        self.history_button.clicked.connect(self._show_logs)
+        self.pass_button.clicked.connect(self._pass_move)
+        self.exit_button.clicked.connect(self.close)
 
-        button_grid.addWidget(pass_button, 0, 1)
-        button_grid.addWidget(history_button, 0, 2)
-        button_grid.addWidget(exit_button, 0, 3)
+        button_grid.addWidget(self.pass_button, 0, 1)
+        button_grid.addWidget(self.history_button, 0, 2)
+        button_grid.addWidget(self.exit_button, 0, 3)
 
         menu_grid = qtw.QGridLayout()
         menu_grid.addWidget(self._move_line, 0, 0)
@@ -158,7 +159,7 @@ class GameWindow(qtw.QWidget):
                     self.clock.restart()
 
     def update(self):
-        for button in self._field_buttons:
+        for button in self.field_buttons:
             button.redraw()
 
         if self.clock:
@@ -191,10 +192,14 @@ class GameWindow(qtw.QWidget):
                 self._game_params.main_player == 'white') or \
                     not self._game.is_online_mode:
                 while True:
-                    white_name, white_ok = qtw.QInputDialog. \
-                        getText(self, 'Запись результатов',
-                                'Введите имя белого игрока\n'
-                                '(без пробелов, не более 12 символов):')
+                    if not self._main_win.is_debug:
+                        white_name, white_ok = qtw.QInputDialog. \
+                            getText(self, 'Запись результатов',
+                                    'Введите имя белого игрока\n'
+                                    '(без пробелов, не более 12 символов):')
+                    else:
+                        white_name = 'white_name'
+                        white_ok = True
                     if (len(white_name) > 12 or len(white_name) < 1
                         or ' ' in white_name) and white_ok:
                         msg = qtw.QMessageBox.question(self, 'Ошибка имени',
@@ -206,10 +211,15 @@ class GameWindow(qtw.QWidget):
                 self._game_params.main_player == 'black') or \
                     not self._game.is_online_mode:
                 while True:
-                    black_name, black_ok = qtw.QInputDialog. \
-                        getText(self, 'Запись результатов',
-                                'Введите имя черного игрока\n'
-                                '(без пробелов, не более 12 символов):')
+                    if not self._main_win.is_debug:
+                        black_name, black_ok = qtw.QInputDialog. \
+                            getText(self, 'Запись результатов',
+                                    'Введите имя черного игрока\n'
+                                    '(без пробелов, не более 12 символов):')
+                    else:
+                        black_name = 'white_name'
+                        black_name = True
+                        break
                     if (len(black_name) > 12 or len(black_name) < 1 or
                         ' ' in black_name) and black_ok:
                         msg = qtw.QMessageBox.question(self, 'Ошибка имени',
@@ -242,15 +252,18 @@ class GameWindow(qtw.QWidget):
             restart_str = ''
 
         result_str = f'{white_str}\n{black_str}\n{win_str}\n{restart_str}'
-        reply = qtw.QMessageBox.question(self, 'Restart',
-                                         result_str,
-                                         *buttons
-                                         )
+        if not self._main_win.is_debug:
+            reply = qtw.QMessageBox.question(self, 'Restart',
+                                             result_str,
+                                             *buttons
+                                             )
+        else:
+            reply = qtw.QMessageBox.No
 
         if reply == qtw.QMessageBox.Yes:
             self.log_window.close()
             self._game = gm.create_game(self._game_params)
-            for button in self._field_buttons:
+            for button in self.field_buttons:
                 button.set_game_condition(self._game)
 
         else:
@@ -261,6 +274,7 @@ class GameWindow(qtw.QWidget):
         self.log_window = BoardWindow(self._game.log_manager, self)
 
     def closeEvent(self, a0) -> None:
+        self._main_win.game_window = None
         self._main_win.show()
 
         if self.log_window:

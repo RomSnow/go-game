@@ -2,13 +2,13 @@ import os
 
 from PyQt5.QtCore import QSize
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication, QWidget
 from PyQt5.QtWidgets import QPushButton, QMessageBox, QSizePolicy
 
 from game_core import game_manager as gm
 
 
-class CellButton(QPushButton):
+class CellButton(QPushButton, QWidget):
     def __init__(self, position: tuple, field_size: int,
                  game: gm.Game, game_window):
         super().__init__()
