@@ -10,13 +10,13 @@ from web.connect_service import ConnectionService
 class HostRoom(ConnectionService):
     def __init__(self):
         super().__init__()
-        self._ip = self._get_my_ip()
+        self.ip = self._get_my_ip()
         self._socket = self._init_socket()
         self._connection = None
 
     def _init_socket(self) -> socket.socket:
         try:
-            sock = socket.create_server((self._ip, 5000))
+            sock = socket.create_server((self.ip, 5000))
             sock.settimeout(3)
         except OSError:
             raise web_exc.WrongConnection
@@ -41,20 +41,21 @@ class HostRoom(ConnectionService):
                     raise web_exc.WrongConnection
 
         self._connection = con
-        con.sendall(str(game_params).encode())
+        if game_params:
+            con.sendall(str(game_params).encode())
         if queue:
             queue.put(0)
         return True
 
     @staticmethod
     def _get_my_ip() -> str:
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        s.connect(('<broadcast>', 0))
-        return s.getsockname()[0]
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+            s.connect(('<broadcast>', 0))
+            return s.getsockname()[0]
 
     def get_address_code(self) -> str:
-        address = self._ip.split('.')
+        address = self.ip.split('.')
         code_str = ''
 
         for sym in address:

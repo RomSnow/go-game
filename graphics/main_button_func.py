@@ -90,8 +90,8 @@ class ButtonFunc:
         self.main_window.hide()
 
     def create_button_func(self):
-        host_room = HostRoom()
-        address = host_room.get_address_code()
+        self.host_room = HostRoom()
+        address = self.host_room.get_address_code()
 
         game_params = gm.GameParams(
             game_mode=self.main_window.game_mode,
@@ -101,16 +101,17 @@ class ButtonFunc:
             second_on_move=self.main_window.time_on_move.value()
         )
         out_queue = Queue()
-        thread = thr.Thread(target=host_room.wait_connection,
+        thread = thr.Thread(target=self.host_room.wait_connection,
                             args=(game_params, out_queue))
         thread.start()
-        try:
-            w = AddressOutMessage(address)
-        except gm.ExitException:
-            host_room.cancel()
-            return
-        thread.join()
+        if not self.main_window.is_debug:
+            try:
+                w = AddressOutMessage(address)
+            except gm.ExitException:
+                self.host_room.cancel()
+                return
 
+        thread.join()
         ans = out_queue.get()
         if ans == 0:
             pass
@@ -120,11 +121,11 @@ class ButtonFunc:
                                                  QtWidgets.QMessageBox.Ok)
             return
 
-        if host_room:
-            host_room.send_confirm()
+        if self.host_room:
+            self.host_room.send_confirm()
         self.main_window.game_window = GameWindow(game_params,
                                                   self.main_window,
-                                                  host_room)
+                                                  self.host_room)
         self.main_window.hide()
 
     def record_button_func(self):
